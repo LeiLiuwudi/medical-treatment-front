@@ -22,7 +22,7 @@ class LeftNav extends Component {
       currentPath: "/admin/home",
       menuList: [
         {
-          title: "新建患者个人信息",
+          title: "新增患者病历",
           path: "/admin/newPatient",
           icon: <UserAddOutlined />,
         },
@@ -32,7 +32,7 @@ class LeftNav extends Component {
           icon: <SolutionOutlined />,
         },
         {
-          title: "新增治疗记录",
+          title: "新增患者病历",
           path: "/admin/addRecord",
           icon: <FileAddOutlined />,
         },

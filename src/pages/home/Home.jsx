@@ -78,7 +78,7 @@ class Home extends Component {
           }}
         >
           <div style={{ display: "flex" }}>
-            <h1 style={{ color: "#ffffff" }}>脊椎康复辅助系统</h1>
+            <h1 style={{ color: "#ffffff" }}>颈椎诊疗辅助系统</h1>
             <div
               style={{
                 width: 500,
@@ -172,7 +172,7 @@ class Home extends Component {
                     新增治疗（病历）记录
                   </div>
                   <span className="text">
-                    新增诊疗流程，包括治疗前后的记录对比
+                    新增患者病历记录
                   </span>
                 </div>
               </Link>
@@ -229,7 +229,7 @@ class Home extends Component {
             </Col>
           </Row>
           <img
-            src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600354340678&di=957c9d7a43c2fa4e0de8a1afcca881dd&imgtype=0&src=http%3A%2F%2Fbpic.588ku.com%2Fback_pic%2F05%2F83%2F03%2F505c4baf6a587b2.jpg"
+            src="医疗.png"
             alt=""
             style={{
               width: "100%",

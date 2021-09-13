@@ -1,6 +1,6 @@
 const menuList = [
   {
-    title: "新建患者个人信息",
+    title: "新增患者病历",
     path: "/admin/newPatient",
     icon: "file",
   },

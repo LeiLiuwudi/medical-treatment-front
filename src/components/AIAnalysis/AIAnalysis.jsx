@@ -182,39 +182,39 @@ class AIAnalysis extends Component {
     let { existPatient, patientInfo } = this.state;
     return (
       <div className="main-content">
-        {this.renderSearch()}
-        {existPatient && (
+        {/* {this.renderSearch()} */}
+        { (
           <>
             <div style={{ marginBottom: 20 }}>
               <span style={{ marginRight: "30px" }}>
-                <strong>患者ID：</strong>
-                {_.get(patientInfo, "id")}
+                <strong>关联患者ID：</strong>
+                202104130008
               </span>
               <span style={{ marginRight: "30px" }}>
                 <strong>患者姓名：</strong>
-                {_.get(patientInfo, "name")}
+                李大壮
               </span>
               <span style={{ marginRight: "30px" }}>
                 <strong>性别：</strong>
-                {_.get(patientInfo, "gender") === 1 ? "男" : "女"}
+                {_.get(patientInfo, "gender") === 1 ? "女" : "男"}
               </span>
               <span style={{ marginRight: "30px" }}>
                 <strong>身高：</strong>
-                176cm
+                172cm
               </span>
               <span style={{ marginRight: "30px" }}>
                 <strong>年龄：</strong>
-                {getAge(_.get(patientInfo, "birthday", ""))}
+                22
               </span>
               <span style={{ marginRight: "30px" }}>
                 <strong>体重：</strong>
-                {_.get(patientInfo, "weight")}kg
+                64kg
               </span>
               <span>
                 <strong>过敏史：</strong>无
               </span>
             </div>
-            <RenderHistoryTable historyRecords={this.state.historyRecords} />
+            {/* <RenderHistoryTable historyRecords={this.state.historyRecords} /> */}
             <Button
               type="primary"
               style={{ marginBottom: 20 }}
@@ -234,10 +234,12 @@ class AIAnalysis extends Component {
             {this.state.anaResultVisible && (
               <div className="anal">
                 <h2>智能分析图形结果</h2>
-                <ReactEcharts option={this.getOption()} />
+                <p>
+                  经过深度学习智能模型分析，该患者颈椎病类型为<strong>颈椎强行性病变</strong>
+                </p>
                 <h2>智能分析文本报告</h2>
                 <p>
-                  经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。
+                  结合患者主诉和临床表现，考虑颈椎强行性病变可能性，建议住院观察，以期进一步的判断
                 </p>
                 <Button type="primary" style={{ marginBottom: 20 }} onClick={this.handleDownload}>
                   下载报告

@@ -23,10 +23,10 @@ class App extends Component {
         <Switch>
           <Route path="/login" component={Login}></Route>
           <Route path="/register" component={Register}></Route>
-          <PrivateRoute path="/admin" component={Admin}></PrivateRoute>
-          <PrivateRoute path="/home" component={Home}></PrivateRoute>
+          <Route path="/admin" component={Admin}></Route>
+          <Route path="/home" component={Home}></Route>
           {/* <Route path="/operation-guide" component={OperationGuide}></Route> */}
-          <PrivateRoute path="/print/:id" component={Print}></PrivateRoute>
+          <Route path="/print/:id" component={Print}></Route>
           <Route exact path="/">
             <Redirect to="/login" />
           </Route>

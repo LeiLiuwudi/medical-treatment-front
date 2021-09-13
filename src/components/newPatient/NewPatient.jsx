@@ -1,5 +1,5 @@
 import React , { useState, useEffect } from "react";
-import { Form, Input, Select, Button, DatePicker, Modal } from "antd";
+import { Upload,Form, Input, Select, Button, DatePicker, Modal } from "antd";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import API from "../../api/api";
@@ -80,12 +80,22 @@ function NewPatient(props) {
 
   // 医院科室
   const departmentList = [
-    "脊柱骨科",
-    "骨外科",
+    "康复神经科",
     "普通外科",
-    "神经外科",
-    "心胸外科",
+    "普通内科"
   ];
+  const doctors = [
+    "汪亚群",
+    "芦丹",
+    "杨桂芬",
+    "孙迪"
+  ]
+  const diseases = [
+    "正常",
+    "颈椎疲劳",
+    "颈椎劳损",
+    "颈椎强行性病变"
+  ]
   const diseaseOptions = diseaseList.map((item) => {
     return <Option key={item.id} value={item.id}>{item.name}</Option>
   })
@@ -136,7 +146,15 @@ function NewPatient(props) {
             },
           ]}
         >
-          <Select placeholder="请选择医生">{doctorOptions}</Select>
+          <Select placeholder="请选择医生">
+          {doctors.map((item) => {
+              return (
+                <Option key={item} value={item}>
+                  {item}
+                </Option>
+              );
+            })}
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -164,7 +182,7 @@ function NewPatient(props) {
         >
           <Input />
         </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           name="birthday"
           label="出生日期"
           rules={[
@@ -217,7 +235,7 @@ function NewPatient(props) {
           ]}
         >
           <Input type='number'/>
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item
           name="chief"
@@ -234,6 +252,18 @@ function NewPatient(props) {
 
         <Form.Item
           name="medical_history"
+          label="现病史"
+          rules={[
+            {
+              message: "请输入病人现病史",
+            },
+          ]}
+        >
+          <TextArea placeholder="请输入病人现病史" />
+        </Form.Item>
+
+        <Form.Item
+          name="medicals_history"
           label="既往史"
           rules={[
             {
@@ -244,18 +274,48 @@ function NewPatient(props) {
           <TextArea placeholder="请输入病人既往史" />
         </Form.Item>
         <Form.Item
-          name="diseaseId"
-          label="疾病"
-        >
-          <Select placeholder="请选择疾病">{diseaseOptions}</Select>
-        </Form.Item>
+          name="images"
+          label="红外热像图"
 
+        >
+          <Upload
+            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+            listType="picture-card"
+            // fileList={fileList}
+            // onPreview={this.handlePreview}
+            // onChange={this.handleChange}
+          ><Button></Button></Upload>
+        </Form.Item>
+        <Form.Item
+          name="diseaseId"
+          label="初步诊断"
+          rules={[{ required: true, message: "请输入诊断意见" }]}
+        >
+          <Select placeholder="请选择疾病">
+        
+            {diseases.map((item) => {
+              return (
+                <Option key={item} value={item}>
+                  {item}
+                </Option>
+              );
+            })}
+          
+          </Select>
+        </Form.Item>
         <Form.Item
           name="opinion"
+          label="诊断依据"
+          rules={[{ required: true, message: "请输入诊断意见" }]}
+        >
+          <TextArea placeholder="请输入诊断依据" />
+        </Form.Item>
+        <Form.Item
+          name="opinions"
           label="诊断意见"
           rules={[{ required: true, message: "请输入诊断意见" }]}
         >
-          <TextArea placeholder="请输入病人主诉" />
+          <TextArea placeholder="请输入诊断意见" />
         </Form.Item>
         <Form.Item>
           <Button
