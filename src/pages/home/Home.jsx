@@ -73,12 +73,12 @@ class Home extends Component {
             position: "fixed",
             zIndex: 1,
             width: "100%",
-            background: "rgb(57,141,238)",
+            background: "rgb(16,16,49)",
             fontSize: "24px",
           }}
         >
           <div style={{ display: "flex" }}>
-            <h1 style={{ color: "#ffffff" }}>颈椎诊疗辅助系统</h1>
+            <h1 style={{ color: "#ffffff" }}>颈椎病智慧医疗系统</h1>
             <div
               style={{
                 width: 500,
@@ -91,8 +91,8 @@ class Home extends Component {
               <UserOutlined
                 style={{ color: "blue", fontSize: "30px", marginRight: "10px" }}
               />
-              <span>科室：{department} </span>
-            <span style={{ marginLeft: 10 }}> 医生id: {doctorId}</span>
+              <span>科室：&nbsp;&nbsp;{department} </span>
+            <span style={{ marginLeft: 10 }}> 医生姓名:&nbsp;&nbsp; {doctorId}</span>
               <span
                 style={{ marginLeft: 10 }}
                 className="logout"

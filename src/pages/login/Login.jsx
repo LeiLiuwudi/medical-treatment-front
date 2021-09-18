@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect, Link } from "react-router-dom";
 import { Form, Icon, Input, Button, Message } from "antd";
 import "./login.less";
-import kangfu from "../../assets/images/kangfu.jpg";
+import yiliao from "../../assets/images/yiliao.jpg";
 import memoryUtils from "../../utils/memoryUtils";
 import API from "../../api/api";
 
@@ -205,8 +205,7 @@ class Login extends Component {
         <div className="login-wrapper">
           <div className="login-left">
             <div className="login-left-container">
-              <img src={kangfu} alt="logo" />
-              <h1>脊椎康复辅助诊疗系统</h1>
+              <h1>颈椎病智慧医疗系统</h1>
             </div>
           </div>
           <div className="login-right">
@@ -268,7 +267,7 @@ class Login extends Component {
             </Form>
           </div>
         </div>
-        <div className="footer">——————— ZJU@2020 —————————</div>
+        <div className="footer">——————— ZJU@2021 —————————</div>
       </div>
     );
   }
