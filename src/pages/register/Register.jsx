@@ -36,8 +36,7 @@ class Register extends Component {
       let param = {
         username: values.username,
         password: values.password,
-        name: values.name,
-        department: values.department,
+        trueName: values.name
       };
       API.register(param)
         .then((res) => {
@@ -192,8 +191,7 @@ class Register extends Component {
         <div className="login-wrapper">
           <div className="login-left">
             <div className="login-left-container">
-              <img src={kangfu} alt="logo" />
-              <h1>脊椎康复辅助诊疗系统</h1>
+              <h1>颈椎病智慧医疗系统</h1>
             </div>
           </div>
           <div className="login-right">
@@ -246,17 +244,6 @@ class Register extends Component {
                 />
               </Form.Item>
               <Form.Item
-                name="department"
-                rules={[{ required: true, message: "请输入科室!" }]}
-              >
-                <Input
-                  prefix={
-                    <Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />
-                  }
-                  placeholder="科室"
-                />
-              </Form.Item>
-              <Form.Item
                 rules={[{ required: true, message: "请输入验证码!" }]}
                 name="verificationCode"
               >
@@ -290,7 +277,7 @@ class Register extends Component {
             </Form>
           </div>
         </div>
-        <div className="footer">——————— 辅助诊断平台 —————————</div>
+        <div className="footer">——————— ZJU@2021 —————————</div>
       </div>
     );
   }

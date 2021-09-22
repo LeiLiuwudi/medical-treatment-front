@@ -1,7 +1,7 @@
 import { getCookie } from "../pages/home/Home";
 
-const BaseUrl = "http://10.16.98.192:9090";
-// const BaseUrl = "http://localhost:8080";
+// const BaseUrl = "http://10.16.98.192:9090";
+const BaseUrl = "http://localhost:8080";
 const UrlMap = [
   {
     description: "用户登录", // 用到，成功
@@ -16,155 +16,21 @@ const UrlMap = [
     type: "POST",
   },
   {
-    description: "获取病历列表",
-    method: "getRecordList",
-    url: "/record/getAllRecords",
-    type: "POST",
-  },
-  {
-    description: "获取单个病历",
-    method: "getRecord",
-    url: "/record/getSimRecord",
-    type: "POST",
-  },
-  {
-    description: "获取病种id列表", // 用到,调通了
-    method: "getDisease",
-    url: "/disease/all",
-    type: "POST",
-  },
-  {
-    description: "删除电子病历记录",
-    method: "removeRecord",
-    url: "/record/remove",
-    type: "POST",
-  },
-  {
-    description: "获取相似电子病历",
-    method: "getSimRecord",
-    url: "/record/getRecWithSim",
-    type: "POST",
-  },
-  {
-    description: "处理分析结果，即更新数据库",
-    method: "updateRecord",
-    url: "/record/update",
-    type: "POST",
-  },
-  {
-    description: "获取医生列表",
-    method: "getDoctors",
-    url: "/doctor/getDoctors",
-    type: "POST",
-  },
-  {
-    description: "获取西医主药",
-    method: "getWesternMedicine",
-    url: "/record/westernMedicine",
-    type: "POST",
-  },
-  {
-    description: "获取中医辅药",
-    method: "getChineseMedicine",
-    url: "/record/chineseMedicine",
-    type: "POST",
-  },
-  {
-    description: "电子病历下载",
-    method: "downloadRecord",
-    url: "/record/download",
-    type: "GET",
-  },
-  {
-    description: "康复跟踪",
-    method: "recordTrace",
-    url: "/record/trace",
-    type: "POST",
-  },
-
-  {
-    description: "python后端获取分析结果", // 调试了，成功
-    method: "getAnalyseResult",
-    url: "http://10.16.98.192:5000/analysis",
-    type: "POST",
-  },
-  {
-    description: "专家模型用药帮助",
-    method: "proMedicineHelp",
-    url: "http://10.13.81.189:5000/proMedicineHelp",
-    type: "POST",
-  },
-  {
-    description: "相似电子病历用药帮助",
-    method: "simMedicineHelp",
-    url: "http://10.13.81.189:5000/simMedicineHelp",
-    type: "POST",
-  },
-  //=====================================新的
-  {
-    description: "新建提交患者个人信息", // 用到, 联调成功
-    method: "addPatient",
-    url: "/patient/addPatient",
-    type: "POST",
-  },
-  {
-    description: "患者信息查询", // 用到,联调成功
-    method: "getPatient",
-    url: "/patient/getPatient",
-    type: "POST",
-  },
-  {
-    description: "更新患者信息", // 用到，新加的，联调更新无效
-    method: "updatePatientInfo",
-    url: "/patient/updatePatientInfo",
-    type: "POST",
-  },
-  {
-    description: "获取病人历史治疗记录", // 用到
-    method: "getHistoryRecords",
-    url: "/record/getHistoryRecords",
-    type: "POST",
-  },
-  {
-    description: "上传本次治疗的内容", // 用到，新的------
-    method: "uploadRecord",
-    url: "/record/uploadRecord",
-    type: "POST",
-  },
-  // {
-  //   description: "上传本次治疗前的内容", // 用到
-  //   method: "saveBeforeTreat",
-  //   url: "/api/saveBeforeTreat",
-  //   type: "POST",
-  // },
-  // {
-  //   description: "上传本次治疗的内容", // 用到
-  //   method: "treat",
-  //   url: "/api/treat",
-  //   type: "POST",
-  // },
-  // {
-  //   description: "上传本次治疗后的内容", // 用到
-  //   method: "saveAfterTreat",
-  //   url: "/api/saveAfterTreat",
-  //   type: "POST",
-  // },
-  {
-    description: "获取医生权限列表", // 用到
-    method: "getAccessList",
-    url: "/api/getAccessList",
-    type: "GET",
-  },
-  {
-    description: "修改医生权限后提交", // 用到
-    method: "updataAccess",
-    url: "/api/updataAccess",
-    type: "POST",
-  },
-  {
-    description: "获取医生部门和id", // 用到
+    description: "获取用户具体信息", // 用到，成功
     method: "getUser",
     url: "/user/getUser",
+    type: "POST",
+  },
+  {
+    description: "获取医生列表", // 用到，成功
+    method: "getDoctorList",
+    url: "/doctor/getDoctorList",
+    type: "POST",
+  },
+  {
+    description: "添加患者病历信息", // 用到，成功
+    method: "addPatient",
+    url: "/patient/addPatient",
     type: "POST",
   },
 ];

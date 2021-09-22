@@ -17,14 +17,7 @@ function UpdateModal(props) {
 
   useEffect(() => {
     setVisible(props.visible);
-    API.getDisease().then((res) => {
-      if(res.code==='200'){
-        setDiseaseList(res.data);
-      } else {
-        warning(res.msg);
-      }
-    });
-    API.getDoctors().then((res) => {
+    API.getDoctorList().then((res) => {
       if(res.code==='200'){
         setDoctorList(res.data);
       } else {

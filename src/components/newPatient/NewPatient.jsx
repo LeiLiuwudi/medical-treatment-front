@@ -24,14 +24,7 @@ function NewPatient(props) {
   const [doctorList,setDoctorList] = useState([])
 
   useEffect( () => {
-    API.getDisease().then((res) => {
-      if(res.code==='200'){
-        setDiseaseList(res.data);
-      } else {
-        warning(res.msg);
-      }
-    });
-    API.getDoctors().then((res) => {
+    API.getDoctorList().then((res) => {
       if(res.code==='200'){
         setDoctorList(res.data);
       } else {
@@ -53,52 +46,34 @@ function NewPatient(props) {
 
   const onFinish = (values) => {
     let param = {
-      id: values.patientId,
       name: values.name,
-      birthday: moment(values.birthday).format("YYYY-MM-DD"),
-      gender: values.gender,
-      weight: values.weight,
-      height: values.height,
-      department: values.department,
       doctorId: values.doctorId,
-      chief: values.chief,
-      medicalHistory: values.medical_history,
-      opinion: values.opinion,
-      dieseaseId: values.diseaseId,
+      gender: values.gender,
+      birthday: moment(values.birthday).format("YYYY-MM-DD"),
+      profession: values.profession,
+      chiefComplaint: values.chiefComplaint,
+      presentHistory: values.presentHistory,
+      pastHistory: values.pastHistory,
+      initialDiagnosis: values.initialDiagnosis,
+      diagnoseBasis: values.diagnoseBasis,
     };
 
     // 提交接口 调试成功
     API.addPatient(param).then((res) => {
       if (res.code === "200") {
         success("提交成功！");
-        props.history.push("/admin/patientQuery");
       } else {
         warning(res.msg);
       }
     });
   };
 
-  // 医院科室
-  const departmentList = [
-    "康复神经科",
-    "普通外科",
-    "普通内科"
-  ];
-  const doctors = [
-    "汪亚群",
-    "芦丹",
-    "杨桂芬",
-    "孙迪"
-  ]
   const diseases = [
     "正常",
     "颈椎疲劳",
     "颈椎劳损",
     "颈椎强行性病变"
   ]
-  const diseaseOptions = diseaseList.map((item) => {
-    return <Option key={item.id} value={item.id}>{item.name}</Option>
-  })
 
   const doctorOptions = doctorList.map((item) => {
     return <Option key={item.id} value={item.id}>{item.name}</Option>
@@ -116,24 +91,16 @@ function NewPatient(props) {
         scrollToFirstError
       >
         <Form.Item
-          name="department"
-          label="科室"
+          name="name"
+          label="患者姓名"
           rules={[
             {
               required: true,
-              message: "请选择科室!",
+              message: "请输入患者姓名",
             },
           ]}
         >
-          <Select placeholder="请选择科室">
-            {departmentList.map((item) => {
-              return (
-                <Option key={item} value={item}>
-                  {item}
-                </Option>
-              );
-            })}
-          </Select>
+          <Input />
         </Form.Item>
 
         <Form.Item
@@ -147,42 +114,21 @@ function NewPatient(props) {
           ]}
         >
           <Select placeholder="请选择医生">
-          {doctors.map((item) => {
-              return (
-                <Option key={item} value={item}>
-                  {item}
-                </Option>
-              );
-            })}
+          {doctorOptions}
           </Select>
         </Form.Item>
 
         <Form.Item
-          name="patientId"
-          label="患者id"
-          rules={[
-            {
-              required: true,
-              message: "请输入患者id",
-            },
-          ]}
+          name="gender"
+          label="患者性别"
         >
-          <Input type='number'/>
+          <Select placeholder="请选择患者性别">
+            <Option value={1} >男</Option>
+            <Option value={0}>女</Option>
+          </Select>
         </Form.Item>
 
         <Form.Item
-          name="name"
-          label="患者姓名"
-          rules={[
-            {
-              required: true,
-              message: "请输入患者姓名",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        {/* <Form.Item
           name="birthday"
           label="出生日期"
           rules={[
@@ -193,52 +139,17 @@ function NewPatient(props) {
             },
           ]}
         >
-          <DatePicker style={{ width: "100%" }} />
-        </Form.Item>
-        <Form.Item
-          name="gender"
-          label="患者性别"
-          rules={[
-            {
-              required: true,
-              message: "请选择患者性别",
-            },
-          ]}
-        >
-          <Select>
-            <Option value={1}>男</Option>
-            <Option value={0}>女</Option>
-          </Select>
+          <DatePicker style={{ width: "100%" }} placeholder = "请输入患者出生日期"/>
         </Form.Item>
 
         <Form.Item
-          name="height"
-          label="身高(cm)"
-          rules={[
-            {
-              required: true,
-              message: "请输入患者身高",
-            },
-          ]}
+          name="profession"
+          label="职业"
         >
-          <Input type='number'/>
+          <Input placeholder="请输入病人职业" />
         </Form.Item>
-
         <Form.Item
-          name="weight"
-          label="体重(kg)"
-          rules={[
-            {
-              required: true,
-              message: "请输入患者体重",
-            },
-          ]}
-        >
-          <Input type='number'/>
-        </Form.Item> */}
-
-        <Form.Item
-          name="chief"
+          name="chiefComplaint"
           label="主诉"
           rules={[
             {
@@ -251,47 +162,25 @@ function NewPatient(props) {
         </Form.Item>
 
         <Form.Item
-          name="medical_history"
+          name="presentHistory"
           label="现病史"
-          rules={[
-            {
-              message: "请输入病人现病史",
-            },
-          ]}
         >
           <TextArea placeholder="请输入病人现病史" />
         </Form.Item>
 
         <Form.Item
-          name="medicals_history"
+          name="pastHistory"
           label="既往史"
-          rules={[
-            {
-              message: "请输入病人既往史",
-            },
-          ]}
         >
           <TextArea placeholder="请输入病人既往史" />
         </Form.Item>
+        
         <Form.Item
-          name="images"
-          label="红外热像图"
-
-        >
-          <Upload
-            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            listType="picture-card"
-            // fileList={fileList}
-            // onPreview={this.handlePreview}
-            // onChange={this.handleChange}
-          ><Button></Button></Upload>
-        </Form.Item>
-        <Form.Item
-          name="diseaseId"
+          name="initialDiagnosis"
           label="初步诊断"
           rules={[{ required: true, message: "请输入诊断意见" }]}
         >
-          <Select placeholder="请选择疾病">
+          <Select placeholder="请选择诊断结果">
         
             {diseases.map((item) => {
               return (
@@ -304,18 +193,11 @@ function NewPatient(props) {
           </Select>
         </Form.Item>
         <Form.Item
-          name="opinion"
+          name="diagnoseBasis"
           label="诊断依据"
-          rules={[{ required: true, message: "请输入诊断意见" }]}
+          rules={[{ required: true, message: "请输入诊断依据" }]}
         >
           <TextArea placeholder="请输入诊断依据" />
-        </Form.Item>
-        <Form.Item
-          name="opinions"
-          label="诊断意见"
-          rules={[{ required: true, message: "请输入诊断意见" }]}
-        >
-          <TextArea placeholder="请输入诊断意见" />
         </Form.Item>
         <Form.Item>
           <Button
@@ -323,23 +205,13 @@ function NewPatient(props) {
             htmlType="submit"
             style={{
               width: 150,
-              marginLeft: 400,
+              marginTop:100,
+              marginLeft: "90%" ,
             }}
           >
             提交
           </Button>
         </Form.Item>
-        <Link to="/admin/addRecord">
-          <Button
-            type="primary"
-            style={{
-              width: 150,
-              marginLeft: 400,
-            }}
-          >
-            去添加病历
-          </Button>
-        </Link>
       </Form>
     </div>
   );

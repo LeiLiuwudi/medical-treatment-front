@@ -16,6 +16,7 @@ import "./home.less";
 
 export const deleteCookie = (name) => {
   var exp = new Date();
+  console.log(22222);
   exp.setTime(exp.getTime()-1);
   var val = getCookie(name);
   if(val!=null){
@@ -35,8 +36,7 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      department: '',
-      doctorId: 0,
+      name: "",
     };
   }
 
@@ -57,15 +57,14 @@ class Home extends Component {
             Message.error(msg);
           } else {
             this.setState({
-              department: data.department,
-              doctorId: data.id,
+              name: data.trueName,
             })
           }
         })
   }
 
   render() {
-    const { doctorId, department} = this.state;
+    const { name} = this.state;
     return (
       <Layout>
         <Header
@@ -73,7 +72,7 @@ class Home extends Component {
             position: "fixed",
             zIndex: 1,
             width: "100%",
-            background: "rgb(16,16,49)",
+            background: "darkBlue",
             fontSize: "24px",
           }}
         >
@@ -88,13 +87,9 @@ class Home extends Component {
                 color: "#ffffff",
               }}
             >
-              <UserOutlined
-                style={{ color: "blue", fontSize: "30px", marginRight: "10px" }}
-              />
-              <span>科室：&nbsp;&nbsp;{department} </span>
-            <span style={{ marginLeft: 10 }}> 医生姓名:&nbsp;&nbsp; {doctorId}</span>
+              <span>欢迎您，{name}医生</span>
               <span
-                style={{ marginLeft: 10 }}
+                style={{ marginLeft: 80, color: "white" }}
                 className="logout"
                 onClick={this.logout}
               >
@@ -110,22 +105,11 @@ class Home extends Component {
             height: "100vh",
             marginTop: 64,
             marginBottom: 0,
-            background: "rgb(236,236,236)",
+            background: "darkBlue",
             fontSize: "24px",
           }}
         >
-          {/* <a
-            href="/operationGuide/operation-guide.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              marginBottom: "20px",
-              display: "block",
-              fontWeight: "bold",
-            }}
-          >
-            点击查看操作指南
-          </a> */}
+
           <Row gutter={16}>
             <Col span={8}>
               <Link to="/admin/newPatient">
@@ -139,7 +123,7 @@ class Home extends Component {
                     <UserAddOutlined className="icon" />
                     新建患者个人信息
                   </div>
-                  <span className="text">点击添加新患者信息</span>
+                  <span className="text">点击新建新患者个人信息</span>
                 </div>
               </Link>
             </Col>
@@ -155,7 +139,7 @@ class Home extends Component {
                     <SolutionOutlined className="icon" />
                     患者信息查询管理
                   </div>
-                  <span className="text">患者信息查询管理</span>
+                  <span className="text">点击进行患者信息查询管理</span>
                 </div>
               </Link>
             </Col>
@@ -172,7 +156,7 @@ class Home extends Component {
                     新增治疗（病历）记录
                   </div>
                   <span className="text">
-                    新增患者病历记录
+                    点击新增患者病历记录
                   </span>
                 </div>
               </Link>
@@ -191,7 +175,7 @@ class Home extends Component {
                     <MonitorOutlined className="icon" />
                     病历查询
                   </div>
-                  <span className="text">病历信息查询管理</span>
+                  <span className="text">点击进行病历信息查询管理</span>
                 </div>
               </Link>
             </Col>
@@ -207,7 +191,7 @@ class Home extends Component {
                     <AlertOutlined className="icon" />
                     智能分析
                   </div>
-                  <span className="text">人工智能分析治疗结果</span>
+                  <span className="text">点击进行人工智能分析</span>
                 </div>
               </Link>
             </Col>
@@ -223,13 +207,13 @@ class Home extends Component {
                     <SettingOutlined className="icon" />
                     权限控制
                   </div>
-                  <span className="text">用户权限控制</span>
+                  <span className="text">点击进行用户权限控制</span>
                 </div>
               </Link>
             </Col>
           </Row>
           <img
-            src="医疗.png"
+            src="yiliao.png"
             alt=""
             style={{
               width: "100%",

@@ -6,18 +6,24 @@
 export function formatDateToSecond(time) {
   if (!time) return "";
   let date = new Date(time);
+  let year = date.getFullYear();
+  let month = date.getMonth();
+  let day = date.getDate();
+  let hour = date.getHours();
+  let minute = date.getMinutes();
+  let second = date.getSeconds();
   return (
-    date.getFullYear() +
+    year +
     "-" +
-    (date.getMonth() + 1) +
+    (month + 1 < 10 ? "0" + (month + 1) : month + 1) +
     "-" +
-    date.getDate() +
+    (day < 10 ? "0" + day : day) +
     " " +
-    date.getHours() +
+    (hour < 10 ? "0" + hour : hour) +
     ":" +
-    date.getMinutes() +
+    (minute < 10 ? "0" + minute : minute) +
     ":" +
-    date.getSeconds()
+    (second < 10 ? "0" + second : second)
   );
 }
 

@@ -43,10 +43,10 @@ class Login extends Component {
             Message.error("登录失败，用户名或密码错误！");
           } else {
             Message.success("登录成功！");
-            if(data.token&&data.exp){
-              document.cookie = "token="+ data.token+";expires="+new Date(data.exp).toGMTString();
+            if(data.token&&data.expireTime){
+              document.cookie = "token="+ data.token+";expires="+new Date(data.expireTime);
             }
-            this.props.history.push('/home');
+            this.props.history.push('/home')
           }
         })
         .catch((err) => {

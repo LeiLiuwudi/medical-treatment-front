@@ -51,7 +51,6 @@ class PatientQuery extends Component {
       totalNum: 0,
       pageNum: 1,
       pageSize: 10,
-      diseaseList: [],
 
       doctorList: [],
       selectAuxliMedicine: [],
@@ -169,16 +168,6 @@ class PatientQuery extends Component {
     return Math.ceil((today - date) / 31536000000);
   }
 
-  // 获取病种id对应的病种
-  getDisease(diseaseId) {
-    let disease = "未诊断";
-    (this.state.diseaseList || []).forEach((element) => {
-      if (element.id === diseaseId) {
-        disease = element.disease;
-      }
-    });
-    return disease;
-  }
 
   showUpdateInfoModal = (record) => {
     this.setState({
@@ -187,19 +176,14 @@ class PatientQuery extends Component {
     });
   };
   // 获取病种列表接口
-  fetchDisease() {
-    API.getDisease()
-      .then((response) => {
-        console.log("getDisease", response);
-        let _data = response.data;
-        let _code = response.code;
+  getDoctorList() {
+    API.getDoctorList()
+      .then((res) => {
+        let _data = res.data;
+        let _code = res.code;
         if (_code === "200") {
           this.setState({
-            diseaseList: _data,
-          });
-        } else {
-          this.setState({
-            diseaseList: null,
+            doctorList: _data,
           });
         }
       })
@@ -262,8 +246,8 @@ class PatientQuery extends Component {
 
   // 页面渲染前执行函数
   componentDidMount() {
-    this.queryPatient();
-    this.fetchDisease();
+    // this.queryPatient();
+    this.getDoctorList();
   }
   // 患者查询表单
   renderSearch = () => {
@@ -310,18 +294,13 @@ class PatientQuery extends Component {
   render() {
     const tableColumns = [
       {
-        title: "主治医生",
-        dataIndex: "doctorName",
-        width: "6%",
-      },
-      {
-        title: "患者id",
-        dataIndex: "id",
-        width: "6%",
-      },
-      {
         title: "患者姓名",
         dataIndex: "name",
+        width: "6%",
+      },
+      {
+        title: "主治医生",
+        dataIndex: "doctorName",
         width: "6%",
       },
       {
@@ -340,21 +319,14 @@ class PatientQuery extends Component {
           return this.calculateAge(birthday);
         },
       },
-      // {
-      //   title: "就诊时间",
-      //   dataIndex: "createAt",
-      //   width: "8%",
-      // },
       {
-        title: "病人主诉",
-        dataIndex: "chief",
-        // ellipsis: true,
-        width: "10%",
-        tooltip: true,
+        title: "职业",
+        dataIndex: "profession",
+        width: "8%",
       },
       {
-        title: "诊断结果",
-        dataIndex: "disease",
+        title: "初步诊断结果",
+        dataIndex: "initialDiagnosis",
         width: "10%",
       },
       {

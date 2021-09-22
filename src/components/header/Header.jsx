@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import "./header.less";
 import { formatDateToSecond } from "../../utils/dateUtils";
-import { Icon, Modal, Button, Table } from "antd";
+import { Modal, Button, Table } from "antd";
+import {QuestionCircleOutlined} from '@ant-design/icons';
 
 import menuList from "./../../config/menuConfig";
 
@@ -39,9 +40,26 @@ class Header extends Component {
       });
     });
     // const {dayPictureUrl, weather} = await reqWeather('北京')
-    // // 更新状态
+    // 更新状态
     // this.setState({dayPictureUrl, weather})
   };
+  deleteCookie = (name) => {
+    var exp = new Date();
+    console.log(22222);
+    exp.setTime(exp.getTime()-1);
+    var val = this.getCookie(name);
+    if(val!=null){
+      document.cookie= name + "="+val+";expires="+exp.toGMTString();
+    }
+  }
+  
+  getCookie = (name) => {
+    var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+    if(arr=document.cookie.match(reg))
+      return unescape(arr[2]);
+    else
+      return null;
+  }
 
   getTitle = () => {
     // 得到当前请求路径
@@ -69,6 +87,8 @@ class Header extends Component {
    * 退出登录
    */
   logout = () => {
+    this.deleteCookie("token");
+    console.log(111111111);
     this.props.history.replace("/login");
   };
 
@@ -98,7 +118,7 @@ class Header extends Component {
   };
 
   render() {
-    const { currentTime  } = this.state;
+    const { currentTime, dayPictureUrl, weather} = this.state;
     const title = this.getTitle();
     const columns = [
       {
@@ -117,9 +137,15 @@ class Header extends Component {
     const data = [
       {
         key: "1",
-        name: "脊椎康复辅助系统",
-        version: "1.1.0",
-        updateTime: "2020-08-01",
+        name: "颈椎病智慧医疗系统",
+        version: "0.0.1",
+        updateTime: "2021-09-01",
+      },
+      {
+        key: "2",
+        name: "颈椎病智慧医疗系统",
+        version: "0.0.2",
+        updateTime: "2021-09-19",
       },
     ];
     return (
@@ -127,16 +153,15 @@ class Header extends Component {
         <span className="page-title">{title}</span>
         <div className="header-right">
           <span className="currentTime">{currentTime}</span>
-          {/* <span style={{ marginRight: "10px" }}>
+          <span style={{ marginRight: "10px" }}>
             <span>天气：{weather}</span>
             <img
               style={{ width: "24px", height: "24px", marginLeft: "5px" }}
               src={dayPictureUrl}
               alt="天气"
             />
-          </span> */}
-          <Icon type="global" />
-          <Icon type="question-circle" onClick={this.showDialog} />
+          </span>
+          <QuestionCircleOutlined onClick={this.showDialog}/>
           <span className="logout" onClick={this.logout}>
             退出
           </span>
@@ -148,7 +173,7 @@ class Header extends Component {
           footer={[<Button onClick={this.handleCancel}>关闭</Button>]}
         >
           <div className="about-content">
-            <h3 className="table-title">脊椎康复辅助平台</h3>
+            <h3 className="table-title">颈椎病智慧医疗系统</h3>
             <Table
               columns={columns}
               dataSource={data}
