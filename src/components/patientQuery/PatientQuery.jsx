@@ -305,6 +305,9 @@ class PatientQuery extends Component {
       updateInfoModalVisible: isvisible,
     });
   };
+  query = () => {
+    this.queryPatient();
+  }
 
   // 渲染的页面
   render() {
@@ -698,6 +701,7 @@ class PatientQuery extends Component {
           visible={this.state.updateInfoModalVisible}
           handleModalVisible={this.handleModalVisible}
           modalPatientInfo={this.state.modalPatientInfo}
+          queryPatient={this.queryPatient}
         />
       </div>
     );

@@ -46,7 +46,7 @@ class Header extends Component {
   deleteCookie = (name) => {
     var exp = new Date();
     console.log(22222);
-    exp.setTime(exp.getTime()-1);
+    exp.setTime(exp.getTime()-1 * 24 * 60 * 60 * 1000);
     var val = this.getCookie(name);
     if(val!=null){
       document.cookie= name + "="+val+";expires="+exp.toGMTString();

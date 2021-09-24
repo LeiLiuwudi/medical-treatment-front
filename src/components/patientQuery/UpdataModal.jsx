@@ -51,6 +51,7 @@ function UpdateModal(props) {
       console.log("res", res);
       if (res.code === "200") {
         success("更新成功！");
+        props.queryPatient();
         hideModal();
       } else {
         warning(res.msg);
