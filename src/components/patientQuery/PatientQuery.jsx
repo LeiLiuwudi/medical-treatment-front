@@ -53,6 +53,12 @@ class PatientQuery extends Component {
       pageSize: 10,
 
       doctorList: [],
+      diseaseList: [
+        "正常",
+        "颈椎疲劳",
+        "颈椎劳损",
+        "颈椎强行性病变"
+      ],
       selectAuxliMedicine: [],
       selectMainMedicine: [
         <Option key={"环磷酰胺"}>{"环磷酰胺"}</Option>,
@@ -128,16 +134,15 @@ class PatientQuery extends Component {
   // 删除确认
   confirm = () => {
     let param = {
-      id: this.state.listData[this.state.chosenIndex].id,
+      id: this.state.chosenIndex,
     };
-    API.removeRecord(param)
+    API.deletePatient(param)
       .then((response) => {
-        let _data = response.data;
         let _code = response.code;
         // let _msg = response.msg;
-        if (_code === "200" && _data === 1) {
-          Message.info("该病历已删除！");
-          this.state.listData.splice(this.state.chosenIndex, 1);
+        if (_code === "200") {
+          Message.info("删除成功！");
+          this.queryPatient();
           this.setState({
             modalSwitch: false,
           });
@@ -194,10 +199,9 @@ class PatientQuery extends Component {
 
   handleSearchReset = () => {
     let config = {
-      patientId: undefined,
       name: undefined,
       doctorId: undefined,
-      doctorName: undefined,
+      initialDiagnosis: undefined,
     };
     this.refs.patientQueryForm.setFieldsValue(config);
     this.queryPatient();
@@ -213,16 +217,15 @@ class PatientQuery extends Component {
     for (const [, value] of Object.entries(values)) {
       if (value) {
         param = {
-          patientId: values.patientId,
-          patientName: values.name,
+          name: values.name,
           doctorId: values.doctorId,
-          doctorName: values.doctorName,
+          initialDiagnosis: values.initialDiagnosis,
         };
       }
     }
 
     // 获取患者列表的API，成功
-    API.getPatient(param).then((res) => {
+    API.queryPatient(param).then((res) => {
       console.log("getPatient", res);
       const { data, code, msg } = res;
       if (code === "200") {
@@ -246,11 +249,15 @@ class PatientQuery extends Component {
 
   // 页面渲染前执行函数
   componentDidMount() {
-    // this.queryPatient();
+    this.queryPatient();
     this.getDoctorList();
   }
   // 患者查询表单
   renderSearch = () => {
+    const {doctorList, diseaseList} = this.state;
+    const doctorOptions = doctorList.map((item) => {
+      return <Option key={item.id} value={item.id}>{item.name}</Option>
+    })
     return (
       <Form
         layout="inline"
@@ -258,17 +265,26 @@ class PatientQuery extends Component {
         onFinish={this.queryPatient}
         ref="patientQueryForm"
       >
-        <Form.Item name="patientId" label="患者id：">
-          <Input placeholder="患者id" style={{ width: 80 }} />
-        </Form.Item>
         <Form.Item name="name" label="患者姓名：">
-          <Input placeholder="患者姓名" style={{ width: 80 }} />
+          <Input placeholder="患者姓名" style={{ width: 160 }} />
         </Form.Item>
-        <Form.Item name="doctorId" label="主治医生id：">
-          <Input placeholder="主治医生id" style={{ width: 80 }} />
+        <Form.Item name="doctorId" label="主治医生：">
+        <Select placeholder="请选择医生" style={{ width: 160 }}>
+          {doctorOptions}
+          </Select>
         </Form.Item>
-        <Form.Item name="doctorName" label="主治医生姓名：">
-          <Input placeholder="主治医生姓名" style={{ width: 80 }} />
+        <Form.Item name="initialDiagnosis" label="初步诊断：">
+        <Select placeholder="请选择诊断结果" style={{ width: 160 }}>
+        
+        {diseaseList.map((item) => {
+          return (
+            <Option key={item} value={item}>
+              {item}
+            </Option>
+          );
+        })}
+      
+      </Select>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
@@ -355,13 +371,13 @@ class PatientQuery extends Component {
         render: (text, record, index) => {
           return (
             <div>
-              <Link to={`/admin/addRecord/${record.id}`} target="_blank">
+              <Link to={`/admin/newPatient`} target="_blank">
                 <Button
                   type="primary"
                   style={{
                     marginRight: "5px",
                     backgroundColor: "green",
-                    borderColor: "green",
+                    borderColor: "greem",
                   }}
                 >
                   新增病历
@@ -371,12 +387,23 @@ class PatientQuery extends Component {
                 type="primary"
                 style={{
                   marginRight: "5px",
-                  backgroundColor: "red",
-                  borderColor: "red",
+                  backgroundColor: "blue",
+                  borderColor: "blue",
                 }}
                 onClick={() => this.showUpdateInfoModal(record)}
               >
                 更新患者信息
+              </Button>
+              <Button
+                type="primary"
+                style={{
+                  marginRight: "5px",
+                  backgroundColor: "red",
+                  borderColor: "red",
+                }}
+                onClick={() => this.remove(record.id)}
+              >
+                删除本条病历
               </Button>
             </div>
           );
@@ -452,62 +479,46 @@ class PatientQuery extends Component {
 
             <Row>
               <Col span={12}>
-                <strong>身高(cm):</strong>
-                <span style={{ marginLeft: 20 }}>
-                  {this.state.patientInfo.height}{" "}
-                </span>
-              </Col>
-              <Col span={12}>
-                <strong>体重(kg)：</strong>
-                <span style={{ marginLeft: 37 }}>
-                  {this.state.patientInfo.weight}{" "}
+                <strong>职业:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {this.state.patientInfo.profession}{" "}
                 </span>
               </Col>
             </Row>
             <Row>
               <Col span={12}>
                 <strong>主诉：</strong>
-                <div className="setformat">{this.state.patientInfo.chief}</div>
-              </Col>
-              <Col span={12}>
-                <strong>既往史：</strong>
-                <div className="setformat">
-                  {this.state.patientInfo.medicalHistory}{" "}
-                </div>
+                <div className="setformat">{this.state.patientInfo.chiefComplaint}</div>
               </Col>
             </Row>
             <Row>
-              {/* <Col span={12}>
-                <strong>症状：</strong>
-                <div className="setformat">
-                  {this.state.patientInfo.patientSign}{" "}
-                </div>
-              </Col> */}
               <Col span={12}>
-                <strong>病种：</strong>
-                <div className="setformat">
-                  {this.state.patientInfo.disease}{" "}
-                </div>
+                <strong>现病史：</strong>
+                <div className="setformat">{this.state.patientInfo.presentHistory}</div>
               </Col>
             </Row>
-            {/* <Row>
+            <Row>
               <Col span={12}>
-                <strong>主药：</strong>
-                <div className="setformat">
-                  {this.state.patientInfo.westernMedicine}
-                </div>
+                <strong>既往史：</strong>
+                <div className="setformat">{this.state.patientInfo.pastHistory}</div>
               </Col>
+            </Row>
+            <Row>
               <Col span={12}>
-                <strong>辅药：</strong>
-                <div className="setformat">
-                  {this.state.patientInfo.chineseMedicine}
-                </div>
+                <strong>初步诊断：</strong>
+                <div className="setformat">{this.state.patientInfo.initialDiagnosis}</div>
               </Col>
-            </Row> */}
+            </Row>
+            <Row>
+              <Col span={12}>
+                <strong>诊断依据：</strong>
+                <div className="setformat">{this.state.patientInfo.diagnoseBasis}</div>
+              </Col>
+            </Row>
             <Row>
               <Col>
                 <Button type="primary" onClick={() => this.showHelp()}>
-                  用药帮助
+                  相似电子病历对比分析
                 </Button>
               </Col>
             </Row>
@@ -524,139 +535,164 @@ class PatientQuery extends Component {
         </Modal>
         <Modal
           visible={this.state.helpSwitch}
-          title="基于专家用药模型的用药帮助"
+          title="相似电子病历对比分析"
           onOk={this.helpConfirm}
+          width={1000}
           onCancel={this.helpConfirm}
         >
-          <p>
-            是否加入与甘草关联的
-            <span style={{ color: "red" }}>太子参(0.84)</span>?
-            <br />
-            是否加入与白术关联的<span style={{ color: "red" }}>麦冬(0.72)</span>
-            ?
-          </p>
-        </Modal>
-        <Modal
-          visible={this.state.updateSwitch}
-          width={550}
-          title="更新电子病历"
-          onOk={this.updateConfirm}
-          onCancel={this.updateCancel}
-        >
-          <Form layout="inline">
-            <Form.Item label="姓名" style={{ marginLeft: 27 }}>
-              <p style={{ width: 50, marginBottom: 0 }}>
-                {this.state.patientInfo.name}
-              </p>
-            </Form.Item>
-
-            <Form.Item label="主治医生">
-              <p style={{ width: 50, marginBottom: 0 }}>
-                {this.state.patientInfo.doctorName}
-              </p>
-            </Form.Item>
-            <Form.Item label="年龄">
-              <p style={{ width: 50, marginBottom: 0 }}>
-                {" "}
-                {this.calculateAge(this.state.patientInfo.birthday)}
-              </p>
-            </Form.Item>
-            <Form.Item label="性别">
-              <p style={{ width: 50, marginBottom: 0 }}>
-                {this.state.patientInfo.gender === 0 ? "男" : "女"}
-              </p>
-            </Form.Item>
-            <Form.Item label="主诉" style={{ marginLeft: 27 }}>
-              <p style={{ marginBottom: 0 }}> {this.state.patientInfo.chief}</p>
-            </Form.Item>
-
-            <Form.Item
-              label="病人症状"
-              name="patientSign"
-              style={{ marginLeft: 0 }}
-            >
-              <TextArea
-                style={{ width: 400 }}
-                autoSize={{ minRows: 1, maxRows: 3 }}
-              />
-            </Form.Item>
-            <Form.Item
-              label="中医证型"
-              name="tcmType"
-              style={{ marginLeft: 0 }}
-            >
-              <TextArea
-                style={{ width: 400 }}
-                autoSize={{ minRows: 1, maxRows: 3 }}
-              />
-            </Form.Item>
-            <Form.Item label="诊断" name="disease" style={{ marginLeft: 27 }}>
-              <Select
-                allowClear={true}
-                showSearch
-                style={{ width: 400 }}
-                placeholder="请选择病种"
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {(this.state.diseaseList || []).map((item, index) => (
-                  <Option value={item.id} key={index}>
-                    {item.disease}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="上次处方" style={{ marginLeft: 0 }}>
-              <span>
-                龙眼肉，沙参，芦根，麸炒枳壳，姜半夏，当归，白术，桑寄生，
-              </span>
-              <br />
-              <span>麦冬,茯苓,郁金</span>
-            </Form.Item>
-            <Form.Item label="矫正处方">
-              <span>太子参，浙贝，金银花</span>
-            </Form.Item>
-            <Form.Item label="推荐处方">
-              <p style={{ width: 400, margin: "0px 0px 0px" }}>
-                <span style={{ color: "red", margin: "0px 2px" }}>茯苓</span>
-                <span style={{ color: "red", margin: "0px 2px" }}>当归</span>
-                <span style={{ color: "red", margin: "0px 2px" }}>白芍</span>
-                <span style={{ color: "red", margin: "0px 2px" }}>太子参</span>
-                <span style={{ color: "red", margin: "0px 2px" }}>柴胡</span>
-                <span style={{ color: "red", margin: "0px 2px" }}>麻黄</span>
-                <span style={{ color: "red", margin: "0px 2px" }}>山药</span>
-                <br />
-                <span style={{ margin: "0px 2px 2px 2px" }}>香附</span>
-                <span style={{ margin: "0px 2px" }}>青黛</span>
-              </p>
-            </Form.Item>
-            <Form.Item
-              label="西医主药"
-              name="mainMedicine"
-              style={{ marginLeft: 0 }}
-            >
-              <Select
-                style={{ width: 400 }}
-                placeholder="请选择"
-                mode="multiple"
-              >
-                {this.state.selectMainMedicine}
-              </Select>
-            </Form.Item>
-            <Form.Item label="中医辅药" name="auxMedicine">
-              <Select
-                style={{ width: 400 }}
-                placeholder="请选择"
-                mode="multiple"
-              >
-                {this.state.selectAuxliMedicine}
-              </Select>
-            </Form.Item>
-          </Form>
+          <div className="parent">
+          <div className="current-record">
+            <h3>当前电子病历</h3>
+            <div>
+            <Row>
+              <Col>
+                <strong>患者姓名:</strong>
+                <span style={{ marginLeft: 20 }}>
+                  {this.state.patientInfo.name}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>主治医生:</strong>
+                <span style={{ marginLeft: 20 }}>
+                  {this.state.patientInfo.doctorName}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>性别:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {this.state.patientInfo.gender === 1 ? "男" : "女"}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>生日:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {new Date(this.state.patientInfo.birthday).toLocaleString()}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>职业:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {this.state.patientInfo.profession}{" "}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>主诉：</strong>
+                <div className="setformat">{this.state.patientInfo.chiefComplaint}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>现病史：</strong>
+                <div className="setformat">{this.state.patientInfo.presentHistory}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>既往史：</strong>
+                <div className="setformat">{this.state.patientInfo.pastHistory}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>初步诊断：</strong>
+                <div className="setformat">{this.state.patientInfo.initialDiagnosis}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>诊断依据：</strong>
+                <div className="setformat">{this.state.patientInfo.diagnoseBasis}</div>
+              </Col>
+            </Row>
+          </div>
+          </div>
+          <div style={{float:"left",marginTop: 10, marginLeft: 10, marginRight: 10, width: 1, background: "darkgray"}}></div> 
+          <div className="similar-record">
+            <h3>相似电子病历</h3>
+            <div>
+            <Row>
+              <Col>
+                <strong>患者姓名:</strong>
+                <span style={{ marginLeft: 20 }}>
+                  {this.state.patientInfo.name}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>主治医生:</strong>
+                <span style={{ marginLeft: 20 }}>
+                  {this.state.patientInfo.doctorName}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>性别:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {this.state.patientInfo.gender === 1 ? "男" : "女"}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>生日:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {new Date(this.state.patientInfo.birthday).toLocaleString()}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>职业:</strong>
+                <span style={{ marginLeft: 50 }}>
+                  {this.state.patientInfo.profession}{" "}
+                </span>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>主诉：</strong>
+                <div className="setformat">{this.state.patientInfo.chiefComplaint}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>现病史：</strong>
+                <div className="setformat">{this.state.patientInfo.presentHistory}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>既往史：</strong>
+                <div className="setformat">{this.state.patientInfo.pastHistory}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>初步诊断：</strong>
+                <div className="setformat">{this.state.patientInfo.initialDiagnosis}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>诊断依据：</strong>
+                <div className="setformat">{this.state.patientInfo.diagnoseBasis}</div>
+              </Col>
+            </Row>
+          </div>
+          </div>
+          </div>
         </Modal>
         <UpdateModal
           visible={this.state.updateInfoModalVisible}

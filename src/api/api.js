@@ -33,6 +33,24 @@ const UrlMap = [
     url: "/patient/addPatient",
     type: "POST",
   },
+  {
+    description: "添加患者病历信息", // 用到，成功
+    method: "queryPatient",
+    url: "/patient/queryPatient",
+    type: "POST",
+  },
+  {
+    description: "更新患者病历信息", // 用到，成功
+    method: "updatePatient",
+    url: "/patient/updatePatient",
+    type: "POST",
+  },
+  {
+    description: "删除患者病历信息", // 用到，成功
+    method: "deletePatient",
+    url: "/patient/deletePatient",
+    type: "GET",
+  },
 ];
 const API = {};
 UrlMap.forEach((item) => {

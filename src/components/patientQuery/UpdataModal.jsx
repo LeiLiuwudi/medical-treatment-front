@@ -40,12 +40,14 @@ function UpdateModal(props) {
 
   const onFinish = (values) => {
     let param = values;
-    param.dieseaseId = values.diseaseId;
+    param.id = prePatientInfo.id;
+    param.doctorId = values.doctor.split(",")[0];
+    param.doctorName = values.doctor.split(",")[1];
     param.birthday = moment(values.birthday).format("YYYY-MM-DD");
-    param.id = param.patientId;
+    
 
     // 更新患者信息提交接口
-    API.updatePatientInfo(param).then((res) => {
+    API.updatePatient(param).then((res) => {
       console.log("res", res);
       if (res.code === "200") {
         success("更新成功！");
@@ -61,43 +63,29 @@ function UpdateModal(props) {
     props.handleModalVisible(false);
   };
 
-  // 医院科室
-  const departmentList = [
-    "脊柱骨科",
-    "骨外科",
-    "普通外科",
-    "神经外科",
-    "心胸外科",
-  ];
-
   const diseaseOptions = diseaseList.map((item) => {
     return <Option key={item.id} value={item.id}>{item.name}</Option>
   })
-  const filterDisease = diseaseList.filter((item) =>{
-    return item.name === prePatientInfo.disease;
-  });
   const initialValues = {
-    department: prePatientInfo.department,
-    doctorId: prePatientInfo.doctorId,
-    patientId: prePatientInfo.id,
     name: prePatientInfo.name,
-    birthday: moment(prePatientInfo.birthday),
+    doctor: prePatientInfo.doctorId + "," + prePatientInfo.doctorName,
     gender: prePatientInfo.gender,
-    height: prePatientInfo.height,
-    weight: prePatientInfo.weight,
-    chief: prePatientInfo.chief,
-    medical_history: prePatientInfo.medicalHistory,
-    diseaseId: filterDisease.length > 0 ? filterDisease[0].id : undefined,
-    opinion: prePatientInfo.opinion,
+    birthday: moment(prePatientInfo.birthday),
+    profession: prePatientInfo.profession,
+    chiefComplaint: prePatientInfo.chiefComplaint,
+    presentHistory: prePatientInfo.presentHistory,
+    pastHistory: prePatientInfo.pastHistory,
+    initialDiagnosis: prePatientInfo.initialDiagnosis,
+    diagnoseBasis: prePatientInfo.diagnoseBasis,
   };
 
   const doctorOptions = doctorList.map((item) => {
-    return <Option key={item.id} value={item.id}>{item.name}</Option>
+    return <Option key={item.id} value={item.id+","+item.name}>{item.name}</Option>
   })
 
   return (
     <Modal
-      title={`更新患者信息——${prePatientInfo.id}——${prePatientInfo.name}`}
+      title={`更新患者信息`}
       visible={visible}
       width={1000}
       onCancel={() => hideModal()}
@@ -111,36 +99,28 @@ function UpdateModal(props) {
         initialValues={initialValues}
       >
         <Row>
-          <Col span={6}>
+        <Col span={6}>
             <Form.Item
-              name="department"
-              label="科室"
+              name="name"
+              label="患者姓名"
               rules={[
                 {
                   required: true,
-                  message: "请选择科室!",
+                  message: "请输入患者姓名",
                 },
               ]}
             >
-              <Select placeholder="请选择科室">
-                {departmentList.map((item) => {
-                  return (
-                    <Option key={item} value={item}>
-                      {item}
-                    </Option>
-                  );
-                })}
-              </Select>
+              <Input placeholder="请输入患者姓名"/>
             </Form.Item>
           </Col>
           <Col span={6}>
             <Form.Item
-              name="doctorId"
-              label="主治医生id"
+              name="doctor"
+              label="主治医生"
               rules={[
                 {
                   required: true,
-                  message: "请输入主治医生id",
+                  message: "请选择主治医生",
                 },
               ]}
             >
@@ -149,34 +129,17 @@ function UpdateModal(props) {
           </Col>
           <Col span={6}>
             <Form.Item
-              name="patientId"
-              label="患者id"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入患者id",
-                },
-              ]}
+              name="gender"
+              label="患者性别"
             >
-              <Input />
+              <Select>
+                <Option value={1}>男</Option>
+                <Option value={0}>女</Option>
+              </Select>
             </Form.Item>
           </Col>
         </Row>
         <Row>
-          <Col span={6}>
-            <Form.Item
-              name="name"
-              label="姓名"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入患者姓名",
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
           <Col span={6}>
             <Form.Item
               name="birthday"
@@ -193,62 +156,18 @@ function UpdateModal(props) {
           </Col>
           <Col span={6}>
             <Form.Item
-              name="gender"
-              label="患者性别"
-              rules={[
-                {
-                  required: true,
-                  message: "请选择患者性别",
-                },
-              ]}
+              name="profession"
+              label="患者职业"
+              style={{
+                marginLeft: 10,
+              }}
             >
-              <Select>
-                <Option value={1}>男</Option>
-                <Option value={0}>女</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={6}>
-            <Form.Item
-              name="height"
-              label="身高"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入患者身高",
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item
-              name="weight"
-              label="体重"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入患者体重",
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={6} style={{marginLeft:'20px'}}>
-            <Form.Item
-              name="diseaseId"
-              label="  疾病"
-            >
-              <Select placeholder="请选择疾病">{diseaseOptions}</Select>
+              <Input placeholder="请输入患者职业"/>
             </Form.Item>
           </Col>
         </Row>
         <Form.Item
-          name="chief"
+          name="chiefComplaint"
           label="主诉"
           rules={[
             {
@@ -260,23 +179,31 @@ function UpdateModal(props) {
           <TextArea placeholder="请输入病人主诉" />
         </Form.Item>
         <Form.Item
-          name="medical_history"
+          name="presentHistory"
+          label="现病史"
+        >
+          <TextArea placeholder="请输入病人现病史" />
+        </Form.Item>
+        <Form.Item
+          name="pastHistory"
           label="既往史"
-          rules={[
-            {
-              message: "请输入病人既往史",
-            },
-          ]}
         >
           <TextArea placeholder="请输入病人既往史" />
         </Form.Item>
 
         <Form.Item
-          name="opinion"
-          label="诊断意见"
-          rules={[{ required: true, message: "请输入诊断意见" }]}
+          name="initialDiagnosis"
+          label="初始诊断"
+          rules={[{ required: true, message: "请输入初始诊断结果" }]}
         >
-          <TextArea placeholder="请输入病人主诉" />
+          <TextArea placeholder="请输入病人初始诊断结果" disabled/>
+        </Form.Item>
+        <Form.Item
+          name="diagnoseBasis"
+          label="诊断依据"
+          rules={[{ required: true, message: "请输入诊断依据" }]}
+        >
+          <TextArea placeholder="请输入诊断依据" disabled/>
         </Form.Item>
         <Form.Item>
           <Button

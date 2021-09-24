@@ -47,8 +47,9 @@ function NewPatient(props) {
   const onFinish = (values) => {
     let param = {
       name: values.name,
-      doctorId: values.doctorId,
+      doctorId: values.doctor.split(",")[0],
       gender: values.gender,
+      doctorName: values.doctor.split(",")[1],
       birthday: moment(values.birthday).format("YYYY-MM-DD"),
       profession: values.profession,
       chiefComplaint: values.chiefComplaint,
@@ -62,6 +63,7 @@ function NewPatient(props) {
     API.addPatient(param).then((res) => {
       if (res.code === "200") {
         success("提交成功！");
+        form.resetFields();
       } else {
         warning(res.msg);
       }
@@ -76,7 +78,7 @@ function NewPatient(props) {
   ]
 
   const doctorOptions = doctorList.map((item) => {
-    return <Option key={item.id} value={item.id}>{item.name}</Option>
+    return <Option key={item.id} value={item.id+","+item.name}>{item.name}</Option>
   })
   return (
     <div className="main-content">
@@ -104,7 +106,7 @@ function NewPatient(props) {
         </Form.Item>
 
         <Form.Item
-          name="doctorId"
+          name="doctor"
           label="主治医生"
           rules={[
             {
