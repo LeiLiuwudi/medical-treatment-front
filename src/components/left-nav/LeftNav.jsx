@@ -33,12 +33,12 @@ class LeftNav extends Component {
           icon: <SolutionOutlined />,
         },
         {
-          title: "新增患者病历",
+          title: "颈椎病识别分析",
           path: "/admin/addRecord",
           icon: <FileAddOutlined />,
         },
         {
-          title: "病历查询",
+          title: "颈椎病效果分析",
           path: "/admin/recordQuery",
           icon: <MonitorOutlined />,
         },

@@ -51,6 +51,18 @@ const UrlMap = [
     url: "/patient/deletePatient",
     type: "GET",
   },
+  {
+    description: "获取患者历史红外热像记录信息", // 用到，成功
+    method: "getRecognizeList",
+    url: "/recognize/getRecognizeList",
+    type: "GET",
+  },
+  {
+    description: "上传患者新的红外热像记录", // 用到，成功
+    method: "upload",
+    url: "/recognize/upload",
+    type: "POST",
+  },
 ];
 const API = {};
 UrlMap.forEach((item) => {
@@ -64,7 +76,7 @@ UrlMap.forEach((item) => {
       method: item.type, // 请求方式
       mode: "cors",
       headers: {
-        "Content-Type": "application/json",
+         "Content-Type": "application/json",
         'Authorization': getCookie("token") ,
         "withCredentials": true,
       },
@@ -80,11 +92,12 @@ UrlMap.forEach((item) => {
       option.body = JSON.stringify(data);
     }
 
-    if (item.url === "/record/uploadRecord") {
+    if (item.url === "/recognize/uploa") {
       option = {
         method: "POST",
         // mode: "cors",
         headers: {
+          // "Content-Type": "multipart/form-data; charset=utf-8;boundary=16f0f6d2c45",
           'Authorization': getCookie("token"),
           "withCredentials": true,
         },

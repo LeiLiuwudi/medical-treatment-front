@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table } from "antd";
+import { Table, Button } from "antd";
 import _ from "lodash";
 import moment from "moment";
 
@@ -8,55 +8,81 @@ class RenderHistoryTable extends Component {
     super(props);
     this.state = {};
   }
+  calculateAge(time) {
+    let date = new Date(time);
+    let today = new Date().getTime();
+    return Math.ceil((today - date) / 31536000000);
+  }
 
   // 渲染历史治疗记录表格
   renderHistoryTable = () => {
     const columns = [
       {
-        title: "治疗次数",
-        dataIndex: "count",
-        key: "count",
-        render: (count) => `第${count}次治疗`,
-        width: 110,
+        title: "患者id",
+        dataIndex: "id",
+        key: "id",
+        width: "6%",
       },
       {
-        title: "就诊时间",
-        dataIndex: "time",
-        key: "time",
+        title: "患者姓名",
+        dataIndex: "name",
+        key: "name",
+        width: "6%",
       },
       {
-        title: "红外热像图",
-        dataIndex: "infImage",
-        key: "infImage",
-        render: (infImage) => {
-          return <img src={'http://10.16.98.192:8001/infraFile/after/'+infImage} alt="" width='100px' height='100px'/>;
+        title: "主治医生",
+        dataIndex: "doctorName",
+        width: "6%",
+      },
+      {
+        title: "性别",
+        dataIndex: "gender",
+        width: "6%",
+        render: (gender) => {
+          return gender === 1 ? "男" : "女";
         },
       },
       {
-        title: "红外热像图描述",
-        dataIndex: "infImageDes",
-        key: "infImageDes",
+        title: "年龄",
+        dataIndex: "birthday",
+        width: "6%",
+        render: (birthday) => {
+          return this.calculateAge(birthday);
+        },
       },
-      // {
-      //   title: "核磁共振图像",
-      //   dataIndex: "MRI",
-      //   key: "MRI",
-      // },
-      // {
-      //   title: "核磁共振图像描述",
-      //   dataIndex: "MRIDes",
-      //   key: "MRIDes",
-      // },
-      // {
-      //   title: "核磁共振图像",
-      //   dataIndex: "CT",
-      //   key: "CT",
-      // },
-      // {
-      //   title: "核磁共振图像描述",
-      //   dataIndex: "CTDes",
-      //   key: "CTDes",
-      // },
+      {
+        title: "职业",
+        dataIndex: "profession",
+        width: "8%",
+      },
+      {
+        title: "初步诊断结果",
+        dataIndex: "initialDiagnosis",
+        width: "10%",
+      },
+      {
+        title: "创建时间",
+        dataIndex: "createTime",
+        width: "10%",
+      },
+      {
+        title: "操作",
+        dataIndex: "operation",
+        width: "14%",
+        align: "center",
+        render: (text, record, index) => {
+          return (
+            <Button
+              type="primary"
+              // size="small"
+              style={{ marginRight: "5px" }}
+              onClick={() => this.props.changeState(record)}
+            >
+              选定当前
+            </Button>
+          );
+        },
+      },
     ];
 
     const data = [];
@@ -104,9 +130,10 @@ class RenderHistoryTable extends Component {
       <Table
         bordered="true"
         columns={columns}
-        dataSource={data}
+        dataSource={this.props.historyRecords}
         scroll={{ x: "max-content", y: 600 }}
         pagination={paginationProps}
+
       />
     );
   };
