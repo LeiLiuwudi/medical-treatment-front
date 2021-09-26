@@ -33,18 +33,13 @@ class LeftNav extends Component {
           icon: <SolutionOutlined />,
         },
         {
-          title: "颈椎病识别分析",
-          path: "/admin/addRecord",
+          title: "AI智能检测分析",
+          path: "/admin/AIAnalysis",
           icon: <FileAddOutlined />,
         },
         {
-          title: "颈椎病效果分析",
-          path: "/admin/recordQuery",
-          icon: <MonitorOutlined />,
-        },
-        {
-          title: "智能分析",
-          path: "/admin/AIAnalysis",
+          title: "统计分析",
+          path: "/admin/statisticAnalysis",
           icon: <AlertOutlined />,
         },
         {

@@ -1,107 +1,181 @@
 import React, { Component } from "react";
+import ReactEcharts from "echarts-for-react";
+import RenderInfMode from "./RenderInfMode";
+import RenderCTMode from "./RenderCTMode";
+import RenderMRIMode from "./RenderMRIMode";
+import RenderHistoryTable from "../StatisticAnalysis/RenderHistoryTable";
+import _ from "lodash";
 import {
-  Form,
   Input,
+  Form,
+  Select,
+  Modal,
   Button,
   Message,
-  Progress,
-  message,
+  Tabs,
+  Table,
+  Progress
 } from "antd";
-import ReactEcharts from "echarts-for-react";
+import { UploadOutlined } from '@ant-design/icons';
+import "./AI-analysis.less";
 import API from "../../api/api";
-import _ from "lodash";
+import { getDesFromClassification } from "../../utils/diseaseInfo";
 import { getAge } from "../../utils/dateUtils";
-import RenderHistoryTable from "./RenderHistoryTable";
+
+const { TabPane } = Tabs;
+const { Search } = Input;
+const { Option } = Select;
+
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+}
 
 class AIAnalysis extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      historyRecordVisible: false, // 是否显示历史治疗记录 Modal
+      historyNIRSVisible: false, // 是否显示近红外记录 Modal
+      currentTablePage: 1, // 历史治疗记录表格当前页码
+      existPatient: false, // 是否有患者信息
       patientInfo: {}, // 患者基本信息
-      existPatient: false,
-      historyRecords: [], // 历史治疗记录
+      patientId: "", // 患者id
+      patientName: "",
+      doctorList:[],
+      patientList:[],
+      exactSearch: false,
+      repeatSwitch: false,
+      recognizeList:[],
+      birthday:"",
+      gender:"",
+      profession:"",
+      addInfrareImage: false,
+      curFileBase64:"",
       anaResultVisible: false,
       percent: 0, // 进度条进度
       progressVisible: false, // 是否显示进度条
+      historyRecords: [], // 患者历史治疗记录
+      treatCount: 0, // 治疗次数
+      analysisFileBefore: {
+        img: "",
+        txt: {},
+      }, // 分析需要上传的内容
+      analysisFileAfter: {
+        img: "",
+        txt: {},
+      }, // 分析需要上传的内容
+      anaResultBefore: { imgUrl: "", classification: "", loading: false }, // 治疗前的智能分析结果
+      anaResultAfter: { imgUrl: "", classification: "", loading: false }, //治疗后的智能分析结果
     };
   }
 
-  getOption = () => {
-    let { historyRecords } = this.state;
-    const option = {
-      title: {
-        text: "脊椎疾病严重程度",
-      },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "cross",
-          label: {
-            backgroundColor: "#6a7985",
-          },
-        },
-      },
-      legend: {
-        data: ["脊椎疾病严重程度等级"],
-      },
-      toolbox: {
-        feature: {
-          saveAsImage: {},
-        },
-      },
-      grid: {
-        left: "10%",
-        right: "10%",
-        bottom: "5%",
-        containLabel: true,
-      },
-      xAxis: [
-        {
-          type: "category",
-          boundaryGap: false,
-          name: "治疗次数",
-          data: historyRecords.map((item) => `第${item.treatCount}次`),
-          position: "bottom",
-        },
-      ],
-      yAxis: [
-        {
-          type: "value",
-          name: "脊椎疾病严重程度等级",
-        },
-      ],
-      series: [
-        {
-          name: "脊椎疾病严重程度等级",
-          type: "line",
-          stack: "总量",
-          label: {
-            normal: {
-              show: true,
-              position: "top",
-            },
-          },
-          areaStyle: {},
-          data: historyRecords.map((item) => item.classificationBefore),
-        },
-      ],
-    };
-    return option;
+  // 子组件传来的 图片、 txt 信息
+  handleFile = async (v) => {
+    const imgInfoBefore = _.get(v, "fileBefore.imgInfoBefore");
+    const txtInfoBefore = _.get(v, "fileBefore.txtInfoBefore");
+    const imgInfoAfter = _.get(v, "fileAfter.imgInfoAfter");
+    const txtInfoAfter = _.get(v, "fileAfter.txtInfoAfter");
+    let new_analysisFileBefore = this.state.analysisFileBefore;
+    new_analysisFileBefore.img = await getBase64(imgInfoBefore);
+    new_analysisFileBefore.txt = txtInfoBefore;
+    let new_analysisFileAfter = this.state.analysisFileAfter;
+    new_analysisFileAfter.img = await getBase64(imgInfoAfter);
+    new_analysisFileAfter.txt = txtInfoAfter;
+    this.setState({
+      analysisFileBefore: new_analysisFileBefore,
+      analysisFileAfter: new_analysisFileAfter,
+    });
   };
 
+  getDoctorList() {
+    API.getDoctorList()
+      .then((res) => {
+        let _data = res.data;
+        let _code = res.code;
+        if (_code === "200") {
+          this.setState({
+            doctorList: _data,
+          });
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+  //   页面渲染前执行函数
+  componentDidMount() {
+    this.getDoctorList();
+  }
+
+  // 查询表单
+  renderSearch = () => {
+    const {doctorList} = this.state;
+    const doctorOptions = doctorList.map((item) => {
+      return <Option key={item.id} value={item.id}>{item.name}</Option>
+    })
+    return (
+      <Form
+        layout="inline"
+        style={{ marginBottom: 30 }}
+        onFinish={this.handleSearch}
+        ref="patientQueryForm"
+      >
+        <Form.Item name="name" label="患者姓名：">
+          <Input placeholder="患者姓名" style={{ width: 160 }} />
+        </Form.Item>
+        <Form.Item name="doctorId" label="主治医生：">
+        <Select placeholder="请选择医生" style={{ width: 160 }}>
+          {doctorOptions}
+          </Select>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            查询
+          </Button>
+        </Form.Item>
+      </Form>
+    );
+  };
+
+  handleSearch = (v) => {
+    this.queryPatient(v);
+  };
+
+  // 患者基本信息查询
   queryPatient = (v) => {
-    let param = v;
-    API.getPatient(param).then((res) => {
+    let param = {};
+    let values = this.refs.patientQueryForm.getFieldsValue();
+    for (const [, value] of Object.entries(values)) {
+      if (value) {
+        param = {
+          name: values.name,
+          doctorId: values.doctorId,
+        };
+      }
+    }
+
+    // 获取患者列表的API，成功
+    API.queryPatient(param).then((res) => {
       console.log("getPatient", res);
       const { data, code, msg } = res;
-      if (code === "200" && data.length > 0) {
+      if (code === "200") {
         this.setState({
-          patientInfo: data[0],
-          existPatient: true,
+          patientList: data,
         });
-      } else if( code ==='200' && data.length ===0 ){
-        Message.error('该患者不存在');
-      }else{
+        if(data.length == 0){
+          Message.info("没有找到符合查询条件的病患信息");
+        }else{
+          this.setState({
+            repeatSwitch: true,
+          })
+        }
+      } else {
         Message.error(msg);
       }
     });
@@ -109,9 +183,18 @@ class AIAnalysis extends Component {
 
   // 获取历史治疗记录
   queryHistory = (v) => {
-    let param = v;
+    let param = {};
+    if (typeof v === "object") {
+      param = v;
+    } else {
+      // 判断搜索框输入的参数是id还是name(包括搜索框输入，url获取id 这两种)
+      if (isNaN(v)) {
+        param.patientName = v;
+      } else {
+        param.patientId = v;
+      }
+    }
     API.getHistoryRecords(param).then((res) => {
-      console.log("getHistoryRecords 历史治疗记录", res);
       let records = _.get(res, "data");
       records.sort((a, b) => {
         return a.treatCount - b.treatCount;
@@ -123,23 +206,247 @@ class AIAnalysis extends Component {
     });
   };
 
-  handleQueryInfo = (v) => {
-    this.queryPatient(v);
-    this.queryHistory(v);
+  // 上传治疗前的内容
+  handleSaveBeforeTreat = () => {
+    const values = this.refs.beforeTreatForm.getFieldsValue();
+    let param = values;
+    param.time = new Date();
+    API.saveBeforeTreat(param).then((res) => {
+      if ((res.code = "200")) {
+        Message.success("上传成功！");
+      } else {
+        Message.error("上传失败！");
+      }
+    });
   };
 
-  handleDownload = () => {
-    const { patientInfo } = this.state;
-    window.location.href =
-      "http://10.16.98.192:9090/record/download?id=" + _.get(patientInfo, "id") 
-      + "&description=" + " 经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。";
-    // window.open("http://10.16.98.192:9090/record/download?id=" + _.get(patientInfo, "id") 
-    // + "&description=" + " 经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。") ;
-    // const param = {
-    //   id: _.get(patientInfo, "id"),
-    //   description: "经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。",
-    // }
-    // API.downloadRecord(param).then((res) => {});
+  // 本次治疗的记录
+  handleTreat = () => {
+    const values = this.refs.treatForm.getFieldsValue();
+    let param = values;
+    API.treat(param).then((res) => {
+      if ((res.code = "200")) {
+        Message.success("上传成功！");
+      } else {
+        Message.error("上传失败！");
+      }
+    });
+  };
+
+  // 上传本次治疗后的内容
+  handleSaveAfterTreat = () => {
+    const values = this.refs.afterTreatForm.getFieldsValue();
+    console.log(values);
+    let param = values;
+    API.saveAfterTreat(param).then((res) => {
+      if ((res.code = "200")) {
+        Message.success("上传成功！");
+      } else {
+        Message.error("上传失败！");
+      }
+    });
+  };
+
+  // 分析治疗前
+  handleAnalysisBefore = () => {
+    console.log("this.state.patientId", this.state.patientId);
+    let anaResultBefore = this.state.anaResultBefore;
+    anaResultBefore.loading = true;
+    this.setState({
+      anaResultBefore,
+    });
+    let formData = new FormData();
+    formData.append("original_img", this.state.analysisFileBefore.img);
+    formData.append("temp_matrix", this.state.analysisFileBefore.txt);
+    formData.append("treatCount", this.state.treatCount);
+    formData.append("patientId", this.state.patientId);
+    formData.append("process", "before");
+
+    API.getAnalyseResult(formData)
+      .then((res) => {
+        let new_anaResultBefore = this.state.anaResultBefore;
+        new_anaResultBefore.imgUrl = _.get(res, "neck_area");
+        new_anaResultBefore.classification = _.get(res, "classification");
+        this.setState({
+          anaResultBefore: new_anaResultBefore,
+        });
+      })
+      .catch((err) => {
+        Message.error("分析失败！");
+      })
+      .finally(() => {
+        let new_anaResultBefore = this.state.anaResultBefore;
+        new_anaResultBefore.loading = false;
+        this.setState({
+          anaResultBefore: new_anaResultBefore,
+        });
+      });
+  };
+
+  // 分析治疗后
+  handleAnalysisAfter = () => {
+    let anaResultAfter = this.state.anaResultAfter;
+    anaResultAfter.loading = true;
+    this.setState({
+      anaResultAfter,
+    });
+    var formData = new FormData();
+    formData.append("original_img", this.state.analysisFileAfter.img);
+    formData.append("temp_matrix", this.state.analysisFileAfter.txt);
+    formData.append("treatCount", this.state.treatCount);
+    formData.append("patientId", this.state.patientId);
+    formData.append("process", "after");
+    API.getAnalyseResult(formData)
+      .then((res) => {
+        let new_anaResultAfter = this.state.anaResultAfter;
+        new_anaResultAfter.imgUrl = _.get(res, "neck_area");
+        new_anaResultAfter.classification = _.get(res, "classification");
+        this.setState({
+          anaResultAfter: new_anaResultAfter,
+        });
+      })
+      .catch((err) => {
+        Message.error("分析失败！");
+      })
+      .finally(() => {
+        let new_anaResultAfter = this.state.anaResultAfter;
+        new_anaResultAfter.loading = false;
+        this.setState({
+          anaResultAfter: new_anaResultAfter,
+        });
+      });
+  };
+
+  // 是否显示历史治疗记录
+  showHistoryRecord = () => {
+    this.setState({
+      historyRecordVisible: true,
+    });
+  };
+
+  historyRecordCancel = () => {
+    this.setState({
+      repeatSwitch: false,
+    });
+  };
+  addImageCancle = () => {
+    this.setState({
+      addInfrareImage: false,
+    });
+  }
+
+  // 是否显示近红外记录
+  showHistoryNIRS = () => {
+    this.setState({
+      historyNIRSVisible: true,
+    });
+  };
+
+  historyNIRSCancle = () => {
+    this.setState({
+      historyNIRSVisible: false,
+    });
+  };
+
+  changeState = (record) => {
+    console.log(record);
+    this.setState({
+      patientInfo:record,
+      repeatSwitch: false,
+      exactSearch: true,
+    })
+    let param = {
+      patientId: record.id,
+    }
+    this.getRecognizeList(param);
+  }
+  
+  getRecognizeList = (param) => {
+    API.getRecognizeList(param).then((res) => {
+      const { data, code, msg } = res;
+      if (code === "200") {
+        this.setState({
+          recognizeList: data,
+        });
+      } else {
+        Message.error(msg);
+      }
+    });
+  }
+
+  // 渲染近红外记录的曲线
+  renderNIRSLine = () => {
+    let option = {
+      legend: {},
+      tooltip: {
+        trigger: "axis",
+        showContent: false,
+      },
+      dataset: {
+        source: [
+          [
+            "product",
+            "2020-05-21",
+            "2020-05-30",
+            "2020-06-02",
+            "2020-06-07",
+            "2020-06-12",
+            "2020-06-19",
+          ],
+          ["Matcha Latte", 41.1, 30.4, 65.1, 53.3, 83.8, 98.7],
+          ["Milk Tea", 86.5, 92.1, 85.7, 83.1, 73.4, 55.1],
+          ["Cheese Cocoa", 24.1, 67.2, 79.5, 86.4, 65.2, 82.5],
+          ["Walnut Brownie", 55.2, 67.1, 69.2, 72.4, 53.9, 39.1],
+        ],
+      },
+      xAxis: { type: "category" },
+      yAxis: { gridIndex: 0 },
+      grid: { top: "10%" },
+      series: [
+        { type: "line", smooth: true, seriesLayoutBy: "row" },
+        { type: "line", smooth: true, seriesLayoutBy: "row" },
+        { type: "line", smooth: true, seriesLayoutBy: "row" },
+        { type: "line", smooth: true, seriesLayoutBy: "row" },
+      ],
+    };
+    return <ReactEcharts option={option} />;
+  };
+  
+  show = () =>{
+    this.setState({
+      addInfrareImage: true,
+    })
+  }
+
+  beforeUpload = (f) =>{
+    return false;
+  }
+  
+  onFinish = async(values) =>{
+    let param = values;
+    param.infraImage = this.state.curFileBase64;
+    API.upload(param).then((res) => {
+      if (res.code === "200") {
+        Message.success("上传成功！");
+        let param ={
+          patientId: this.state.patientInfo.id,
+        }
+        this.getRecognizeList(param);
+        this.setState({
+          addInfrareImage: false,
+        })
+      } else {
+        Message.warning(res.msg);
+      }
+    });
+  }
+
+  handleChange = async(e) => {
+    let base64 = await getBase64(e.target.files[0]);
+    console.log(base64);
+    this.setState({
+      curFileBase64: base64,
+    })
   }
 
   handleAnalysis = () => {
@@ -159,70 +466,224 @@ class AIAnalysis extends Component {
     }, 500);
   };
 
-  // 查询表单
-  renderSearch = () => {
+  // 渲染整体的页面
+  render() {
+    const { exactSearch, patientInfo} = this.state;
+    const columns = [
+        {
+          title: "id",
+          dataIndex: "id",
+          width: "6%",
+          align: "center",
+        },
+        {
+          title: "患者姓名",
+          dataIndex: "patientName",
+          width: "6%",
+          align: "center",
+        },
+        {
+          title: "红外热像",
+          dataIndex: "infraredPath",
+          width: "6%",
+          align: "center",
+          render: (text, record, index) => {
+            const src = "http://localhost:8001/" + text;
+            return <img src={src} alt="" crossOrigin="anonymous" width="100px" height="100px"/>
+          }
+        },
+        {
+          title: "就诊时间",
+          dataIndex: "createTime",
+          width: "6%",
+          align: "center",
+        },
+        {
+          title: "识别结果",
+          dataIndex: "recognizeResult",
+          width: "6%",
+          align: "center",
+          render: (text,record,index) => {
+            return (text == "" || text == null || text == undefined) ? 
+            <span>
+              <span style={{color:"red"}}>未检测</span>
+              <Button
+              type="primary"
+              // size="small"
+              style={{ marginLeft: "5px" }}
+              // onClick={() => this.show()}
+            >
+              点击进行检测
+            </Button>
+            </span> : text;
+          }
+        },
+        {
+          title: "操作",
+          dataIndex: "operation",
+          width: "10%",
+          align: "center",
+          render: (text, record, index) => {
+            return (
+              <Button
+                type="primary"
+                // size="small"
+                style={{ marginRight: "5px" }}
+                onClick={() => this.show()}
+              >
+                添加新的红外热像拍摄记录
+              </Button>
+            );
+          },
+        },
+    ]
     return (
-      <Form
-        layout="inline"
-        style={{ marginBottom: 30 }}
-        onFinish={this.handleQueryInfo}
+      <div
+        className="main-content"
       >
-        <Form.Item name="patientId" label="患者id：">
-          <Input style={{ width: 100, marginRight: 15 }} placeholder="患者id" />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            查询
+        {!exactSearch && (<div
+          className="left"
+        >
+          <div>
+            <h2 style={{ marginBottom: "30px" }}>
+              请输入需要添加分析的患者信息：
+            </h2>
+            {this.renderSearch()}
+          </div>
+        </div>)}
+
+        <Modal
+          title={"符合查询条件的病患记录"}
+          visible={this.state.repeatSwitch}
+          onCancel={this.historyRecordCancel}
+          width="90%"
+          style={{
+            position: "absolute",
+            top: "8px",
+            left: "5%",
+          }}
+          footer={null}
+        >
+          <div
+            className="history"
+            style={{
+              width: "100%",
+              height: "70vh",
+              backgroundColor: "#ffffff",
+              borderRadius: "10px",
+              fontSize: "16px",
+            }}
+          >
+            <RenderHistoryTable historyRecords={this.state.patientList} changeState={this.changeState}/>
+          </div>
+        </Modal>
+        <Modal
+          title={"为当前患者添加新的红外热像记录"}
+          visible={this.state.addInfrareImage}
+          onCancel={this.addImageCancle}
+          footer={null}
+        >
+          <Form
+            name="infrare"
+            onFinish={this.onFinish}
+            scrollToFirstError
+          >
+          <Form.Item
+            name="patientId"
+            label="患者id"
+            initialValue={patientInfo.id}
+            rules={[
+              {
+                required: true,
+                message: "请输入患者id",
+              },
+            ]}
+          >
+            <Input placeholder="请输入患者id" disabled/>
+          </Form.Item>
+          <Form.Item
+            name="patientName"
+            label="患者姓名"
+            initialValue={patientInfo.name}
+            rules={[
+              {
+                required: true,
+                message: "请选择患者姓名",
+              },
+            ]}
+          >
+            <Input placeholder="请选择患者姓名" disabled/>
+          </Form.Item>
+          <Form.Item
+            name="infraImage"
+            label="红外热像"
+            rules={[
+              {
+                required: true,
+                message: "请上传红外热像",
+              },
+            ]}
+          >
+            <Input type="file" onChange={this.handleChange}/>
+            {/* <Upload name="logo"  
+            beforeUpload={this.beforeUpload}
+          >
+            <Button icon={<UploadOutlined />}>点击上传</Button>
+          </Upload> */}
+          </Form.Item>
+          <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            style={{
+              width: 150,
+              marginLeft: 150,
+            }}
+          >
+            确定上传新的记录
           </Button>
         </Form.Item>
-      </Form>
-    );
-  };
-  render() {
-    let { existPatient, patientInfo } = this.state;
-    return (
-      <div className="main-content">
-        {/* {this.renderSearch()} */}
-        { (
-          <>
-            <div style={{ marginBottom: 20 }}>
-              <span style={{ marginRight: "30px" }}>
-                <strong>关联患者ID：</strong>
-                202104130008
-              </span>
-              <span style={{ marginRight: "30px" }}>
-                <strong>患者姓名：</strong>
-                李大壮
-              </span>
-              <span style={{ marginRight: "30px" }}>
-                <strong>性别：</strong>
-                {_.get(patientInfo, "gender") === 1 ? "女" : "男"}
-              </span>
-              <span style={{ marginRight: "30px" }}>
-                <strong>身高：</strong>
-                172cm
-              </span>
-              <span style={{ marginRight: "30px" }}>
-                <strong>年龄：</strong>
-                22
-              </span>
-              <span style={{ marginRight: "30px" }}>
-                <strong>体重：</strong>
-                64kg
-              </span>
-              <span>
-                <strong>过敏史：</strong>无
-              </span>
-            </div>
-            {/* <RenderHistoryTable historyRecords={this.state.historyRecords} /> */}
-            <Button
-              type="primary"
-              style={{ marginBottom: 20 }}
-              onClick={this.handleAnalysis}
-            >
-              点击进行智能分析
-            </Button>
-            {this.state.progressVisible && (
+        </Form>
+        </Modal>
+         { exactSearch && (<div><div
+          className="left"
+        >
+          <div>
+            <h2 style={{ marginBottom: "30px" }}>
+              当前患者的红外热像拍摄记录
+            </h2>
+            <h3>
+              当前患者：{patientInfo.name}_____{patientInfo.gender == 1 ? "男":"女"}_____{patientInfo.profession}
+            </h3>
+          </div>
+        </div>
+        <Table
+          bordered="true"
+          columns={columns}
+          dataSource={this.state.recognizeList}
+          // scroll={{ x: "max-content", y: 600 }}
+        /></div>)}
+        {exactSearch && this.state.recognizeList.length==0 && (
+          <Button
+          type="primary"
+          // size="small"
+          style={{ marginRight: "5px" }}
+          onClick={() => this.show()}
+        >
+          去添加新的红外热像拍摄记录
+        </Button>
+        )}
+        {exactSearch && this.state.recognizeList.length!=0 && (
+          <Button
+          type="primary"
+          // size="small"
+          style={{ marginRight: "5px" }}
+          onClick={this.handleAnalysis}
+        >
+          点击进行阶段性治疗效果分析
+        </Button>
+        )}
+        {this.state.progressVisible && (
               <Progress
                 strokeColor={{
                   "0%": "#108ee9",
@@ -231,23 +692,25 @@ class AIAnalysis extends Component {
                 percent={this.state.percent}
               />
             )}
-            {this.state.anaResultVisible && (
+        {this.state.anaResultVisible && (
               <div className="anal">
                 <h2>智能分析图形结果</h2>
                 <p>
-                  经过深度学习智能模型分析，该患者颈椎病类型为<strong>颈椎强行性病变</strong>
+                  经过深度学习智能模型分析，该患者病情未见明显好转，效果不显著，建议更换治疗方案。
                 </p>
                 <h2>智能分析文本报告</h2>
                 <p>
                   结合患者主诉和临床表现，考虑颈椎强行性病变可能性，建议住院观察，以期进一步的判断
                 </p>
-                <Button type="primary" style={{ marginBottom: 20 }} onClick={this.handleDownload}>
+                <Button 
+                  type="primary" 
+                  style={{ marginBottom: 20 }} 
+                  onClick={this.handleDownload}
+                >
                   下载报告
                 </Button>
               </div>
             )}
-          </>
-        )}
       </div>
     );
   }

@@ -144,7 +144,7 @@ class Home extends Component {
               </Link>
             </Col>
             <Col span={8}>
-              <Link to="/admin/addRecord">
+              <Link to="/admin/AIAnalysis">
                 <div
                   className="cardSelect"
                   style={{
@@ -153,10 +153,10 @@ class Home extends Component {
                 >
                   <div>
                     <FileAddOutlined className="icon" />
-                    新增治疗（病历）记录
+                    AI智能检测分析
                   </div>
                   <span className="text">
-                    点击新增患者病历记录
+                    点击进行AI智能检测分析
                   </span>
                 </div>
               </Link>
@@ -164,7 +164,7 @@ class Home extends Component {
           </Row>
           <Row gutter={16} style={{ marginTop: 30 }}>
             <Col span={8}>
-              <Link to="/admin/recordQuery">
+              <Link to="/admin/statisticAnalysis">
                 <div
                   className="cardSelect"
                   style={{
@@ -173,25 +173,9 @@ class Home extends Component {
                 >
                   <div>
                     <MonitorOutlined className="icon" />
-                    病历查询
+                    统计分析
                   </div>
-                  <span className="text">点击进行病历信息查询管理</span>
-                </div>
-              </Link>
-            </Col>
-            <Col span={8}>
-              <Link to="/admin/AIAnalysis">
-                <div
-                  className="cardSelect"
-                  style={{
-                    backgroundColor: "#eb2f96",
-                  }}
-                >
-                  <div>
-                    <AlertOutlined className="icon" />
-                    智能分析
-                  </div>
-                  <span className="text">点击进行人工智能分析</span>
+                  <span className="text">点击进行统计分析</span>
                 </div>
               </Link>
             </Col>

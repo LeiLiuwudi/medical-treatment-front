@@ -10,18 +10,13 @@ const menuList = [
     icon: "file",
   },
   {
-    title: "新增治疗记录",
-    path: "/admin/addRecord",
-    icon: "idcard",
-  },
-  {
-    title: "病历查询",
-    path: "/admin/recordQuery",
-    icon: "idcard",
-  },
-  {
-    title: "智能分析",
+    title: "AI智能检测分析",
     path: "/admin/AIAnalysis",
+    icon: "idcard",
+  },
+  {
+    title: "统计分析",
+    path: "/admin/statisticAnalysis",
     icon: "idcard",
   },
 ];

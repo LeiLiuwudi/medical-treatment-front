@@ -6,12 +6,12 @@ import LeftNav from "./../../components/left-nav/LeftNav";
 import Header from "../../components/header/Header";
 import RecordQuery from "./../../components/recordQuery/RecordQuery";
 import TextAnalysis from "./../../components/recordQuery/TextAnalysis";
-import AddRecord from "../../components/addRecord/AddRecord";
+import AIAnalysis from "../../components/AIAnalysis/AIAnalysis";
 import RecordUpload from "../../components/recordUpload/RecordUpload";
 import PatientQuery from "../../components/patientQuery/PatientQuery";
 //
 import NewPatient from "../../components/newPatient/NewPatient";
-import AIAnalysis from "../../components/AIAnalysis/AIAnalysis";
+import StatisticAnalysis from "../../components/StatisticAnalysis/StatisticAnalysis";
 import AccessControl from "../../components/accessControl/accessControl";
 
 import "./admin.less";
@@ -75,9 +75,8 @@ class Admin extends Component {
               <Route path="/admin/recordQuery" component={RecordQuery} />
               <Route path="/admin/patientQuery" component={PatientQuery} />
               <Route path="/admin/textAnalysis/:id" component={TextAnalysis} />
-              <Route path="/admin/addRecord/:id" component={AddRecord} />
-              <Route path="/admin/addRecord" component={AddRecord} />
               <Route path="/admin/AIAnalysis" component={AIAnalysis} />
+              <Route path="/admin/statisticAnalysis" component={StatisticAnalysis} />
               <Route path="/admin/accessControl" component={AccessControl} />
               <Route path="/admin/recordUpload" component={RecordUpload} />
               <Route path="/admin/newPatient" component={NewPatient} />
