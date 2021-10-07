@@ -63,6 +63,18 @@ const UrlMap = [
     url: "/recognize/upload",
     type: "POST",
   },
+  {
+    description: "获取相似电子病历id", // 用到，成功
+    method: "similarRecord",
+    url: "http://localhost:5000/similarRecord",
+    type: "POST",
+  },
+  {
+    description: "相似电子病历对比", // 用到，成功
+    method: "textComparison",
+    url: "/patient/textComparison",
+    type: "POST",
+  }
 ];
 const API = {};
 UrlMap.forEach((item) => {
@@ -104,11 +116,12 @@ UrlMap.forEach((item) => {
         body: data,
       };
     }
-    if (item.url === "http://10.16.98.192:5000/analysis") {
+    if (item.url === "http://localhost:5000/similarRecord") {
       url = item.url;
       option = {
         method: "POST",
-        body: data,
+        mode: "no-cors",
+        body: JSON.stringify(data),
       };
     }
     if (item.url === "/record/download"){

@@ -32,9 +32,12 @@ class PatientQuery extends Component {
       tableDataLoading: true,
       updateInfoModalVisible: false,
       patientInfo: {},
+      patientInfo1:{},
+      similarPatientInfo:{},
       modalPatientInfo: {}, // 一条record
       currentTablePage: 1,
       drawerSwitch: false,
+      similarAnalysisId:1,
       modalSwitch: false,
       helpSwitch: false,
       tableSwitch: false,
@@ -85,9 +88,41 @@ class PatientQuery extends Component {
   }
 
   showHelp() {
-    this.setState({
-      helpSwitch: true,
-    });
+    let param = {
+      id: this.state.similarAnalysisId,
+    };
+    let similarId = 2;
+    API.similarRecord(param)
+      .then((response) => {
+        similarId = response.id
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    param = {
+      id: this.state.similarAnalysisId,
+      similarId: similarId
+    }
+    API.textComparison(param)
+      .then((response) => {
+        let _code = response.code;
+        let data = response.data;
+        // let _msg = response.msg;
+        if (_code === "200") {
+         this.setState({
+           patientInfo1: data[0],
+           similarPatientInfo: data[1],
+         })
+         this.setState({
+          helpSwitch: true,
+        });
+        } else {
+          Message.info("对比分析后台报错，请稍后重试");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   showUpdate() {
@@ -103,6 +138,7 @@ class PatientQuery extends Component {
       newPatientInfo[item] = record[item] === null ? "暂无" : record[item];
     });
     this.setState({
+      similarAnalysisId: record.id,
       drawerSwitch: true,
       patientInfo: newPatientInfo,
     });
@@ -489,19 +525,19 @@ class PatientQuery extends Component {
               </Col>
             </Row>
             <Row>
-              <Col span={12}>
+              <Col span={24}>
                 <strong>主诉：</strong>
                 <div className="setformat">{this.state.patientInfo.chiefComplaint}</div>
               </Col>
             </Row>
             <Row>
-              <Col span={12}>
+              <Col span={24}>
                 <strong>现病史：</strong>
                 <div className="setformat">{this.state.patientInfo.presentHistory}</div>
               </Col>
             </Row>
             <Row>
-              <Col span={12}>
+              <Col span={24}>
                 <strong>既往史：</strong>
                 <div className="setformat">{this.state.patientInfo.pastHistory}</div>
               </Col>
@@ -551,7 +587,7 @@ class PatientQuery extends Component {
               <Col>
                 <strong>患者姓名:</strong>
                 <span style={{ marginLeft: 20 }}>
-                  {this.state.patientInfo.name}
+                  {this.state.patientInfo1.name}
                 </span>
               </Col>
             </Row>
@@ -559,7 +595,7 @@ class PatientQuery extends Component {
               <Col>
                 <strong>主治医生:</strong>
                 <span style={{ marginLeft: 20 }}>
-                  {this.state.patientInfo.doctorName}
+                  {this.state.patientInfo1.doctorName}
                 </span>
               </Col>
             </Row>
@@ -567,7 +603,7 @@ class PatientQuery extends Component {
               <Col>
                 <strong>性别:</strong>
                 <span style={{ marginLeft: 50 }}>
-                  {this.state.patientInfo.gender === 1 ? "男" : "女"}
+                  {this.state.patientInfo1.gender === 1 ? "男" : "女"}
                 </span>
               </Col>
             </Row>
@@ -575,46 +611,46 @@ class PatientQuery extends Component {
               <Col>
                 <strong>生日:</strong>
                 <span style={{ marginLeft: 50 }}>
-                  {new Date(this.state.patientInfo.birthday).toLocaleString()}
+                  {new Date(this.state.patientInfo1.birthday).toLocaleString()}
                 </span>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>职业:</strong>
-                <span style={{ marginLeft: 50 }}>
-                  {this.state.patientInfo.profession}{" "}
+                <span style={{ marginLeft: 50}}>
+                  {this.state.patientInfo1.profession}{" "}
                 </span>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>主诉：</strong>
-                <div className="setformat">{this.state.patientInfo.chiefComplaint}</div>
+                <div className="setformat" dangerouslySetInnerHTML={{__html:this.state.patientInfo1.chiefComplaint}}/>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>现病史：</strong>
-                <div className="setformat">{this.state.patientInfo.presentHistory}</div>
+                <div className="setformat" dangerouslySetInnerHTML={{__html:this.state.patientInfo1.presentHistory}}/>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>既往史：</strong>
-                <div className="setformat">{this.state.patientInfo.pastHistory}</div>
+                <div className="setformat" dangerouslySetInnerHTML={{__html:this.state.patientInfo1.pastHistory}}/>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>初步诊断：</strong>
-                <div className="setformat">{this.state.patientInfo.initialDiagnosis}</div>
+                <div className="setformat">{this.state.patientInfo1.initialDiagnosis}</div>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>诊断依据：</strong>
-                <div className="setformat">{this.state.patientInfo.diagnoseBasis}</div>
+                <div className="setformat">{this.state.patientInfo1.diagnoseBasis}</div>
               </Col>
             </Row>
           </div>
@@ -627,7 +663,7 @@ class PatientQuery extends Component {
               <Col>
                 <strong>患者姓名:</strong>
                 <span style={{ marginLeft: 20 }}>
-                  {this.state.patientInfo.name}
+                  {this.state.similarPatientInfo.name}
                 </span>
               </Col>
             </Row>
@@ -635,7 +671,7 @@ class PatientQuery extends Component {
               <Col>
                 <strong>主治医生:</strong>
                 <span style={{ marginLeft: 20 }}>
-                  {this.state.patientInfo.doctorName}
+                  {this.state.similarPatientInfo.doctorName}
                 </span>
               </Col>
             </Row>
@@ -643,7 +679,7 @@ class PatientQuery extends Component {
               <Col>
                 <strong>性别:</strong>
                 <span style={{ marginLeft: 50 }}>
-                  {this.state.patientInfo.gender === 1 ? "男" : "女"}
+                  {this.state.similarPatientInfo.gender === 1 ? "男" : "女"}
                 </span>
               </Col>
             </Row>
@@ -651,46 +687,46 @@ class PatientQuery extends Component {
               <Col>
                 <strong>生日:</strong>
                 <span style={{ marginLeft: 50 }}>
-                  {new Date(this.state.patientInfo.birthday).toLocaleString()}
+                  {new Date(this.state.similarPatientInfo.birthday).toLocaleString()}
                 </span>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>职业:</strong>
-                <span style={{ marginLeft: 50 }}>
-                  {this.state.patientInfo.profession}{" "}
+                <span style={{ marginLeft: 50}}>
+                  {this.state.similarPatientInfo.profession}{" "}
                 </span>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>主诉：</strong>
-                <div className="setformat">{this.state.patientInfo.chiefComplaint}</div>
+                <div className="setformat" dangerouslySetInnerHTML={{__html:this.state.similarPatientInfo.chiefComplaint}}/>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>现病史：</strong>
-                <div className="setformat">{this.state.patientInfo.presentHistory}</div>
+                <div className="setformat" dangerouslySetInnerHTML={{__html:this.state.similarPatientInfo.presentHistory}}/>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>既往史：</strong>
-                <div className="setformat">{this.state.patientInfo.pastHistory}</div>
+                <div className="setformat" dangerouslySetInnerHTML={{__html:this.state.similarPatientInfo.pastHistory}}/>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>初步诊断：</strong>
-                <div className="setformat">{this.state.patientInfo.initialDiagnosis}</div>
+                <div className="setformat">{this.state.similarPatientInfo.initialDiagnosis}</div>
               </Col>
             </Row>
             <Row>
               <Col>
                 <strong>诊断依据：</strong>
-                <div className="setformat">{this.state.patientInfo.diagnoseBasis}</div>
+                <div className="setformat">{this.state.similarPatientInfo.diagnoseBasis}</div>
               </Col>
             </Row>
           </div>
