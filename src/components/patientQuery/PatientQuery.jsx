@@ -87,13 +87,14 @@ class PatientQuery extends Component {
     });
   }
 
-  showHelp() {
+  async showHelp() {
     let param = {
       id: this.state.similarAnalysisId,
     };
-    let similarId = 2;
-    API.similarRecord(param)
+    let similarId = -1;
+    await API.similarRecord(param)
       .then((response) => {
+        console.log(response.id);
         similarId = response.id
       })
       .catch((error) => {

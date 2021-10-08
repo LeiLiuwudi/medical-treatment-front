@@ -120,9 +120,10 @@ UrlMap.forEach((item) => {
       url = item.url;
       option = {
         method: "POST",
-        mode: "no-cors",
+        // mode: "no-cors",
         body: JSON.stringify(data),
       };
+      return fetch(url, option).then((res) => res.json())
     }
     if (item.url === "/record/download"){
       return fetch(url,option).then((res) => res.json());
