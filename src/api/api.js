@@ -74,6 +74,36 @@ const UrlMap = [
     method: "textComparison",
     url: "/patient/textComparison",
     type: "POST",
+  },
+  {
+    description:"获取权限角色列表",
+    method: "getAccessList",
+    url: "/authority/role",
+    type:"GET"
+  },
+  {
+    description:"根据id获取用户姓名",
+    method: "getUserById",
+    url: "/authority/user-in-role",
+    type:"GET"
+  },
+  {
+    description:"更新角色信息",
+    method:"updateRole",
+    url:"/authority/role",
+    type:"PUT"
+  },
+  {
+    description:"删除当前角色",
+    method:"deleteRole",
+    url:"/authority/role",
+    type:"DELETE"
+  },
+  {
+    description:"添加角色",
+    method:"addRole",
+    url:"/authority/role",
+    type:"POST"
   }
 ];
 const API = {};
@@ -94,7 +124,7 @@ UrlMap.forEach((item) => {
       },
     };
 
-    if (item.type !== "POST") {
+    if (item.type !== "POST" && item.type !== "PUT" && item.type !== "DELETE") {
       let body = Object.keys(data || {})
         .map((key) => key + "=" + data[key])
         .join("&");

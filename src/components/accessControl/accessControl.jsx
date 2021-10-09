@@ -1,154 +1,392 @@
-import React, { useState, useEffect } from "react";
-import { Table, Form, Checkbox, Row, Col, Button, Message } from "antd";
+import React, { useState, useEffect, Component } from "react";
+import { Table, Form, Checkbox, Row, Col, Button, Message, Modal, Select, Input } from "antd";
 import API from "../../api/api";
 import _ from "lodash";
 
-const initialData = [];
+const { Option } = Select;
 
-export default function AccessControl() {
-  const [form] = Form.useForm();
-  const [data, setData] = useState(initialData);
 
-  useEffect(() => {
+class AccessControl extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      modalContent:[],
+      form: null,
+      data: [],
+      user: [],
+      children: [],
+      modalSwitch: false,
+      curData: {},
+      allUsers: [],
+      newRoleData:{},
+      allUsersMap:{},
+      addModalSwitch:false,
+      isAdded:false,
+      authorityList:[]
+    }
+  }
+
+  getUseInfo = () => {
     // todo
     // 发送请求获取权限列表
-    // API.getAccessList().then((res) => {
-    //   if (res.code === "200") {
-    //     setData(res.data);
-    //   }
-    // });
-    fetch("http://mockjs.docway.net/mock/1XRHOKNxZ7h/api/getAccessList")
-      .then((res) => res.json())
-      .then((res) => {
-        const doctorAccessData = _.get(res, "data");
-        setData(doctorAccessData);
-      });
-  }, []);
-
-  // 根据权限的id得到对应的权限名称
-  const accessNames = [
-    { accessId: 0, accessName: "新建患者个人信息" },
-    { accessId: 1, accessName: "患者信息查询管理" },
-    { accessId: 2, accessName: "新增治疗记录" },
-    { accessId: 3, accessName: "病历查询" },
-    { accessId: 4, accessName: "智能分析" },
-    { accessId: 5, accessName: "新增治疗方案" },
-    { accessId: 6, accessName: "权限控制" },
-  ];
-
-  const getNames = (accessArray) => {
-    let result = [];
-    accessArray.map((v) => {
-      accessNames.map((item) => {
-        if (v === item.accessId) {
-          result.push(item.accessName);
+    API.getAccessList().then((res) => {
+      if (res.code === "200") {
+        for(var i = 0; i < res.data.length; i++) {
+          res.data[i]["key"] = i;
         }
-      });
+        let tempChildren = [];
+        let tempAllUsers = []
+        let tempAllUsersMap = {};
+        for(var i = 0; i < res.data.length; i++) {
+            tempChildren[i] = res.data[i]["containUserId"];
+            tempAllUsersMap = Object.assign(tempAllUsersMap,res.data[i]["containUserMap"]);
+            tempAllUsers = tempAllUsers.concat(res.data[i]["containUserId"]);
+        }
+        tempAllUsers = Array.from(new Set(tempAllUsers));
+        this.setState({
+          data: res.data,
+          children: tempChildren,
+          allUsers: tempAllUsers,
+          allUsersMap: tempAllUsersMap
+        })
+        console.log(tempAllUsersMap);
+      }
     });
-    return result;
-  };
-  const change = (record, values) => {
-    record.accessArray = values;
-  };
+   }
 
-  const update = (record) => {
-    console.log(record);
-    let param = {
-      doctorName: record.doctorName,
-      doctorId: record.doctorId,
-      department: record.department,
-      accessArray: record.accessArray,
-    };
-    try {
-      API.updataAccess(param).then((res) => {
-        if (res.code === "200") {
-          Message.success("更新成功");
+   showUpdateInfoModal = (key, data) => {
+    this.setState({
+        modalContent: data[key].containUserName,
+        curData: data[key],
+        newRoleData: data[key],
+        modalSwitch: true,
+
+    })
+   }
+
+   handleOK = () => {
+       this.setState({
+           modalSwitch: false,
+           addModalSwitch: false,
+       })
+   }
+
+   handleCancel = () => {
+       this.setState({
+           modalSwitch: false,
+           addModalSwitch: false,
+       })
+   }
+
+   showAddInfoModal = () => {
+       this.setState({
+        addModalSwitch:true,
+        isAdded:true
+       })
+   }
+
+   handleChange = (value) => {
+    let newUserList = value;
+    this.state.newRoleData.containUserName = value;
+    console.log(value);
+    console.log(this.state.newRoleData);
+    this.refs.updateRoleForm.setFieldsValue({
+        "name": this.state.curData.chineseName,
+        "userList": this.state.curData.containUserName
+    });
+    let values = this.refs.updateRoleForm.getFieldsValue();
+    console.log(values);
+   }
+
+   updateRole = () => {
+       let values = this.refs.updateRoleForm.getFieldsValue();
+    //    let param = JSON.stringify(values);
+       let param = this.state.newRoleData;
+       param.chineseName = values.name;
+       param.containUserId = values.userList;
+       console.log(values);
+       console.log(param);
+       API.updateRole(param).then((res) => {
+           if(res.code == "200") {
+               Message.success("更新成功！");
+               this.setState({
+                   modalSwitch:false
+               })
+           } else {
+               Message.error("更新失败!");
+               this.setState({
+                   modalSwitch:false
+               })
+           }
+       })
+   }
+
+   deleteRole = (key) => {
+    let param = {"roleName":this.state.data[key].name};
+    API.deleteRole(param).then((res) => {
+        if(res.code == "200") {
+            Message.success("删除成功！");
+            this.setState({
+                modalSwitch:false
+            })
         } else {
-          Message.error("更新失败，请重试！");
+            Message.error("删除失败!");
+            this.setState({
+                modalSwitch:false
+            })
         }
-      });
-    } catch (e) {
-      Message.error(e + "更新失败，请重试！");
-    }
-  };
-  const columns = [
-    {
-      title: "医生姓名",
-      dataIndex: "doctorName",
-      width: "15%",
-    },
-    {
-      title: "医生id",
-      dataIndex: "doctorId",
-      width: "15%",
-    },
-    {
-      title: "所属科室",
-      dataIndex: "department",
-      width: "15%",
-    },
-    {
-      title: "权限",
-      dataIndex: "access",
-      width: "60%",
-      editable: true,
-      render: (_, record) => {
-        console.log("record", record);
-        console.log(
-          "getNames(record.accessArray)",
-          getNames(record.accessArray)
-        );
-        return (
-          <Checkbox.Group
-            style={{ width: "100%" }}
-            onChange={(values) => change(record, values)}
-            defaultValue={record.accessArray}
-          >
-            <Row>
-              {accessNames.map((item) => {
-                return (
-                  <Col span={8} key={item.accessName}>
-                    <Checkbox value={item.accessId}>{item.accessName}</Checkbox>
-                  </Col>
-                );
-              })}
-            </Row>
-          </Checkbox.Group>
-        );
-      },
-    },
-    {
-      title: "操作",
-      dataIndex: "operation",
-      render: (_, record) => {
-        return (
-          <Button type="primary" onClick={() => update(record)}>
-            确定
-          </Button>
-        );
-      },
-    },
-  ];
+    });
+   }
 
-  return (
-    <div className="main-content">
-      <h1
-        style={{
-          fontWeight: "bold",
-          fontSize: "30px",
-          textAlign: "center",
-        }}
-      >
-        权限控制
-      </h1>
-      <Form form={form} component={false}>
-        <Table
-          bordered
-          dataSource={data}
-          columns={columns}
-          rowClassName="editable-row"
-        ></Table>
-      </Form>
-    </div>
-  );
+   addRole = () => {
+       let param = {
+           "name" : null,
+           "chineseName": null,
+           "patientCreateAuthority": 0,
+           "recordQueryAuthority": 0,
+           "recordComparisonAuthority": 0,
+           "identifyAuthorityAuthority": 0,
+           "effectEvaluationAuthority": 0,
+           "statAnalysisAuthority": 0,
+           "authorityManagement": 0,
+           "containUserId":[]
+       }
+       let values = this.refs.addRoleForm.getFieldsValue();
+       param.name = values.name;
+       param.chineseName = values.chineseName;
+       let tempAuthorityList = this.state.authorityList;
+       tempAuthorityList.map((authority) => {
+           param[authority] = 1;
+       })
+       param.containUserId = values.userList;
+       console.log(param);
+
+       API.addRole(param).then((res => {
+            if(res.code == "200") {
+                Message.success("添加成功！");
+                this.setState({
+                    addModalSwitch:false
+                })
+            } else {
+                Message.error("添加失败!");
+                this.setState({
+                    addModalSwitch:false
+                })
+            }
+       }));
+   }
+
+   onChangeCheckbox = (values) => {
+       this.setState({
+           authorityList: values
+       })
+       console.log(values);
+   }
+
+   componentDidMount() {
+       this.getUseInfo();
+   }
+
+   render() {
+        const plainOptions = [
+            {label:"新建患者个人信息", value:"patientCreateAuthority"},
+            {label:"病历查询", value:"recordQueryAuthority"},
+            {label:"病历比较", value:"recordComparisonAuthority"},
+            {label:"鉴定", value:"identifyAuthorityAuthority"},
+            {label:"效果评估", value:"effectEvaluationAuthority"},
+            {label:"统计分析", value:"statAnalysisAuthority"},
+            {label:"权限控制", value:"authorityManagement"},
+        ];
+        const columns = [
+           {
+               title:"角色名称",
+               dataIndex:"chineseName",
+               width:"15%"
+           },
+           {
+               title:"人员列表",
+               dataIndex:"containUserId",
+               width:"60%",
+               render: (idArray) => {
+                   return (
+                       <div>
+                           <p>{idArray.map(id => {
+                               return this.state.allUsersMap[id];
+                           }).join('， ')}</p>
+                       </div>
+                   )
+               }
+           },
+           {
+               title:"操作",
+               dataIndex:"key",
+               render: (key) => {
+                    console.log(this.state.modalContent);
+                    console.log(this.state.curData.chineseName);
+                   return (
+                    <div>
+                        <Button type="primary" style={{marginRight:20}} onClick={() => this.showUpdateInfoModal(key, this.state.data)}>
+                        编辑
+                        </Button>
+                        <Button type="primary" style={{marginRight:20}} onClick={() => this.deleteRole(key)}>
+                        删除
+                        </Button>
+                    </div>
+                   )
+               }
+           }
+       ];
+       return (
+        <div className="main-content">
+        <h1
+          style={{
+            fontWeight: "bold",
+            fontSize: "30px",
+            textAlign: "center",
+          }}
+        >
+          权限控制
+        </h1>
+
+        <Form component={false}>
+            <Table
+            bordered
+            dataSource={this.state.data}
+            columns={columns}
+            rowClassName="editable-row"
+            ></Table>
+        </Form>
+
+        <Modal
+            visible={this.state.modalSwitch}
+            title="权限修改"
+            onOk={this.handleOK} 
+            onCancel={this.handleCancel}
+            onChange={this.handleChange}
+            destroyOnClose
+        >
+            <Form
+                layout="horizontal"
+                preserve={false}
+                onFinish={this.updateRole}
+                ref="updateRoleForm"
+                // style={{ marginBottom: 30, display: "flex" }}
+            >
+                <Form.Item name="name" label="角色名称：">
+                    <Input 
+                        defaultValue={this.state.curData.chineseName} 
+                        placeholder="角色名称" 
+                        style={{width:"50%"}}>
+                    </Input>
+                </Form.Item>
+                <br/>
+                <Form.Item name="userList" label="用户列表">
+                    <Select placeholder="请选择用户" 
+                            style={{width:'100%'}} 
+                            mode="multiple"
+                            defaultValue={this.state.curData.containUserId}
+                            onChange={this.handleChange}
+                    >
+                        {this.state.allUsers.map((item) => {
+                            return (
+                                <Option key={item} value={item}>
+                                    {this.state.allUsersMap[item]}
+                                </Option>
+                            )
+                        })}
+                    </Select>
+                </Form.Item>
+
+                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                    <Button type="primary" htmlType="submit">
+                        提交修改
+                    </Button>
+                </Form.Item>
+                
+            </Form>
+
+            <br/>
+
+        </Modal>
+        <Button type="primary" htmlType="submit" onClick = {() => this.showAddInfoModal()}>
+            添加角色
+        </Button>
+
+        <Modal
+            visible={this.state.addModalSwitch}
+            title="增加角色"
+            onOk={this.handleOK} 
+            onCancel={this.handleCancel}
+            onChange={this.handleChange}
+            destroyOnClose
+        >
+            <Form
+                layout="horizontal"
+                preserve={false}
+                onFinish={this.addRole}
+                ref="addRoleForm"
+                // style={{ marginBottom: 30, display: "flex" }}
+            >
+                <Form.Item name="name" label="角色编码：">
+                    <Input 
+                        placeholder="角色编码" 
+                        style={{width:"50%"}}>
+                    </Input>
+                </Form.Item>
+                <Form.Item name="chineseName" label="角色名称：">
+                    <Input 
+                        defaultValue={this.state.curData.chineseName} 
+                        placeholder="角色名称" 
+                        style={{width:"50%"}}>
+                    </Input>
+                </Form.Item>
+                <Checkbox.Group
+                    style={{width:"100%"}}
+                    onChange={this.onChangeCheckbox}
+                >
+                    <Row>
+                        {plainOptions.map((item) => {
+                            return (
+                                <Col span={8} key={item.label}>
+                                    <Checkbox value={item.value}>{item.label}</Checkbox>
+                                </Col>
+                            )
+                        })}
+                    </Row>
+                </Checkbox.Group>
+                <br/>
+                <Form.Item name="userList" label="用户列表">
+                    <Select placeholder="请选择用户" 
+                            style={{width:'100%'}} 
+                            mode="multiple"
+                            // onChange={this.handleAddedChange}
+                    >
+                        {this.state.allUsers.map((item) => {
+                            return (
+                                <Option key={item} value={item}>
+                                    {this.state.allUsersMap[item]}
+                                </Option>
+                            )
+                        })}
+                    </Select>
+                </Form.Item>
+
+                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                    <Button type="primary" htmlType="submit">
+                        提交
+                    </Button>
+                </Form.Item>
+                
+            </Form>
+
+            <br/>
+
+        </Modal>
+
+
+        </div>
+       );
+   }
 }
+
+export default AccessControl;
