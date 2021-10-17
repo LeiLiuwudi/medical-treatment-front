@@ -22,7 +22,17 @@ class AccessControl extends Component {
       allUsersMap:{},
       addModalSwitch:false,
       isAdded:false,
-      authorityList:[]
+      authorityList:[],
+      defaultAuthorityList:[],
+      plainOptions : [
+        {label:"新建患者个人信息", value:"patientCreateAuthority"},
+        {label:"病历查询", value:"recordQueryAuthority"},
+        {label:"病历比较", value:"recordComparisonAuthority"},
+        {label:"鉴定", value:"identifyAuthorityAuthority"},
+        {label:"效果评估", value:"effectEvaluationAuthority"},
+        {label:"统计分析", value:"statAnalysisAuthority"},
+        {label:"权限控制", value:"authorityManagement"},
+        ]
     }
   }
 
@@ -49,17 +59,23 @@ class AccessControl extends Component {
           allUsers: tempAllUsers,
           allUsersMap: tempAllUsersMap
         })
-        console.log(tempAllUsersMap);
       }
     });
    }
 
    showUpdateInfoModal = (key, data) => {
+    let authorityList = [];
+    this.state.plainOptions.map((element) => {
+        if (data[key][element.value] == "1") {
+            authorityList.push(element.value);
+        }
+    })
     this.setState({
         modalContent: data[key].containUserName,
         curData: data[key],
         newRoleData: data[key],
         modalSwitch: true,
+        defaultAuthorityList: authorityList
 
     })
    }
@@ -88,24 +104,35 @@ class AccessControl extends Component {
    handleChange = (value) => {
     let newUserList = value;
     this.state.newRoleData.containUserName = value;
-    console.log(value);
-    console.log(this.state.newRoleData);
     this.refs.updateRoleForm.setFieldsValue({
         "name": this.state.curData.chineseName,
         "userList": this.state.curData.containUserName
     });
     let values = this.refs.updateRoleForm.getFieldsValue();
-    console.log(values);
    }
 
    updateRole = () => {
+       let oldValue = this.state.newRoleData;
        let values = this.refs.updateRoleForm.getFieldsValue();
+       if (values.name == null || values.userList == null) {
+           values.name = oldValue.chineseName;
+           values.userList = oldValue.containUserId;
+       }
     //    let param = JSON.stringify(values);
        let param = this.state.newRoleData;
        param.chineseName = values.name;
        param.containUserId = values.userList;
-       console.log(values);
-       console.log(param);
+       let tempAuthorityList = this.state.authorityList;
+       this.state.plainOptions.map((element) => {
+           if (element.value in tempAuthorityList) {
+               param[element.value] = 1;
+           } else {
+               param[element.value] = 0;
+           }
+       })
+       tempAuthorityList.map((authority) => {
+           param[authority] = 1;
+       })
        API.updateRole(param).then((res) => {
            if(res.code == "200") {
                Message.success("更新成功！");
@@ -159,7 +186,7 @@ class AccessControl extends Component {
            param[authority] = 1;
        })
        param.containUserId = values.userList;
-       console.log(param);
+
 
        API.addRole(param).then((res => {
             if(res.code == "200") {
@@ -173,6 +200,7 @@ class AccessControl extends Component {
                     addModalSwitch:false
                 })
             }
+            window.location.reload();
        }));
    }
 
@@ -180,7 +208,6 @@ class AccessControl extends Component {
        this.setState({
            authorityList: values
        })
-       console.log(values);
    }
 
    componentDidMount() {
@@ -188,15 +215,7 @@ class AccessControl extends Component {
    }
 
    render() {
-        const plainOptions = [
-            {label:"新建患者个人信息", value:"patientCreateAuthority"},
-            {label:"病历查询", value:"recordQueryAuthority"},
-            {label:"病历比较", value:"recordComparisonAuthority"},
-            {label:"鉴定", value:"identifyAuthorityAuthority"},
-            {label:"效果评估", value:"effectEvaluationAuthority"},
-            {label:"统计分析", value:"statAnalysisAuthority"},
-            {label:"权限控制", value:"authorityManagement"},
-        ];
+        const plainOptions = this.state.plainOptions;
         const columns = [
            {
                title:"角色名称",
@@ -221,8 +240,6 @@ class AccessControl extends Component {
                title:"操作",
                dataIndex:"key",
                render: (key) => {
-                    console.log(this.state.modalContent);
-                    console.log(this.state.curData.chineseName);
                    return (
                     <div>
                         <Button type="primary" style={{marginRight:20}} onClick={() => this.showUpdateInfoModal(key, this.state.data)}>
@@ -296,6 +313,22 @@ class AccessControl extends Component {
                         })}
                     </Select>
                 </Form.Item>
+
+                <Checkbox.Group
+                    style={{width:"100%"}}
+                    onChange={this.onChangeCheckbox}
+                    defaultValue={this.state.defaultAuthorityList}
+                >
+                    <Row>
+                        {plainOptions.map((item) => {
+                            return (
+                                <Col span={8} key={item.label}>
+                                    <Checkbox value={item.value}>{item.label}</Checkbox>
+                                </Col>
+                            )
+                        })}
+                    </Row>
+                </Checkbox.Group>
 
                 <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                     <Button type="primary" htmlType="submit">
@@ -372,7 +405,7 @@ class AccessControl extends Component {
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                    <Button type="primary" htmlType="submit">
+                    <Button type="primary" htmlType="submit" >
                         提交
                     </Button>
                 </Form.Item>
