@@ -412,10 +412,21 @@ class AIAnalysis extends Component {
     return <ReactEcharts option={option} />;
   };
   
-  show = () =>{
-    this.setState({
-      addInfrareImage: true,
-    })
+  detect = (id) =>{
+    let param = {
+      id: id,
+    };
+    API.recognizeResult(param)
+      .then((response) => {
+        let param1 = {
+          patientId: this.state.patientInfo.id,
+        }
+        this.getRecognizeList(param1);
+      })
+      .catch((error) => {
+        Message.error("未检测到颈部区域");
+      });
+    
   }
 
   beforeUpload = (f) =>{
@@ -511,7 +522,7 @@ class AIAnalysis extends Component {
               type="primary"
               // size="small"
               style={{ marginLeft: "5px" }}
-              // onClick={() => this.show()}
+              onClick={() => this.detect(record.id)}
             >
               点击进行检测
             </Button>

@@ -60,6 +60,7 @@ class PatientQuery extends Component {
         "正常",
         "颈椎疲劳",
         "颈椎劳损",
+        "颈椎间盘突出",
         "颈椎强行性病变"
       ],
       selectAuxliMedicine: [],

@@ -70,6 +70,12 @@ const UrlMap = [
     type: "POST",
   },
   {
+    description: "红外热像分类", // 用到，成功
+    method: "recognizeResult",
+    url: "http://localhost:5000/recognizeResult",
+    type: "POST",
+  },
+  {
     description: "相似电子病历对比", // 用到，成功
     method: "textComparison",
     url: "/patient/textComparison",
@@ -146,7 +152,7 @@ UrlMap.forEach((item) => {
         body: data,
       };
     }
-    if (item.url === "http://localhost:5000/similarRecord") {
+    if (item.url === "http://localhost:5000/similarRecord" || item.url === "http://localhost:5000/recognizeResult") {
       url = item.url;
       option = {
         method: "POST",
