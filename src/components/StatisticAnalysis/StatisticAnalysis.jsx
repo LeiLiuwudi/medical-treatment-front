@@ -1,189 +1,315 @@
 import React, { Component } from "react";
 import {
   Form,
-  Input,
-  Button,
-  Message,
-  Progress,
-  message,
+  Select,
+  Message
 } from "antd";
 import ReactEcharts from "echarts-for-react";
 import API from "../../api/api";
 import _ from "lodash";
 import { getAge } from "../../utils/dateUtils";
 import RenderHistoryTable from "./RenderHistoryTable";
+const { Option } = Select;
+const timeList = [
+  {
+    "key":"全部",
+    "value": "all"
+  },
+  {
+    "key":"近一周",
+    "value": "weekly"
+  },
+  {
+    "key":"近一月",
+    "value": "monthly"
+  },
+  {
+    "key":"近一年",
+    "value": "yearly"
+  },
+]
+const chartType = [
+  {
+    "key":"直方图",
+    "value":"bar"
+  },
+  {
+    "key":"折线图",
+    "value":"line"
+  },
+  {
+    "key":"饼状图",
+    "value":"pie"
+  }
+]
 
 class StatisticAnalysis extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      patientInfo: {}, // 患者基本信息
-      existPatient: false,
-      historyRecords: [], // 历史治疗记录
-      anaResultVisible: false,
-      percent: 0, // 进度条进度
-      progressVisible: false, // 是否显示进度条
+      categoryNumberChartType:'pie',
+      patientNumberChartType:'line',
+      xOfPatientNumber: [],
+      yOfPatientNumber: [],
+      xOfCategoryNumber: [],
+      yOfCategoryNumber: [],
     };
   }
 
-  getOption = () => {
-    let { historyRecords } = this.state;
-    const option = {
-      title: {
-        text: "脊椎疾病严重程度",
+  getCategoryNumberPieOption = () => {
+    const {xOfCategoryNumber, yOfCategoryNumber} = this.state;
+    const data = []
+    for(var i=0;i<xOfCategoryNumber.length;i++){
+      let obj = {
+        value: yOfCategoryNumber[i],
+        name: xOfCategoryNumber[i]
+      }
+      data.push(obj)
+    }
+    return {
+      title : {
+          text: '某站点用户访问来源',
+          x:'center'
       },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "cross",
-          label: {
-            backgroundColor: "#6a7985",
-          },
-        },
+      tooltip : {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
       },
       legend: {
-        data: ["脊椎疾病严重程度等级"],
+          orient: 'vertical',
+          left: 'left',
+          data: xOfCategoryNumber
       },
-      toolbox: {
-        feature: {
-          saveAsImage: {},
-        },
+      series : [
+          {
+              name: '患者数量',
+              type: 'pie',
+              radius : '55%',
+              center: ['50%', '60%'],
+              data:data,
+              itemStyle: {
+                  emphasis: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+              }
+          }
+      ]
+    }
+  }
+
+  getCategoryNumberOption = () => {
+    const { categoryNumberChartType, xOfCategoryNumber, yOfCategoryNumber} = this.state;
+    return {
+      title: {
+          text: '新增患者数量统计',
+          x: 'center',
+          textStyle: { //字体颜色
+              color: '#ccc'
+          }
       },
-      grid: {
-        left: "10%",
-        right: "10%",
-        bottom: "5%",
-        containLabel: true,
+      tooltip: {},
+      xAxis: {
+          data: xOfCategoryNumber
       },
-      xAxis: [
-        {
-          type: "category",
-          boundaryGap: false,
-          name: "治疗次数",
-          data: historyRecords.map((item) => `第${item.treatCount}次`),
-          position: "bottom",
-        },
-      ],
-      yAxis: [
-        {
-          type: "value",
-          name: "脊椎疾病严重程度等级",
-        },
-      ],
+      yAxis: {},
       series: [
         {
-          name: "脊椎疾病严重程度等级",
-          type: "line",
-          stack: "总量",
-          label: {
-            normal: {
-              show: true,
-              position: "top",
-            },
-          },
-          areaStyle: {},
-          data: historyRecords.map((item) => item.classificationBefore),
-        },
-      ],
+          name: '销量',
+          type: categoryNumberChartType,
+          data: yOfCategoryNumber
+        }
+      ]
     };
-    return option;
-  };
+  }
 
-  queryPatient = (v) => {
-    let param = v;
-    API.getPatient(param).then((res) => {
-      console.log("getPatient", res);
+  getPatientNumberPieOption = () => {
+    const {xOfPatientNumber, yOfPatientNumber} = this.state;
+    const data = []
+    for(var i=0;i<xOfPatientNumber.length;i++){
+      let obj = {
+        value: yOfPatientNumber[i],
+        name: xOfPatientNumber[i]
+      }
+      data.push(obj)
+    }
+    return {
+      title : {
+          text: '新增患者数量统计',
+          x:'center'
+      },
+      tooltip : {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+      },
+      legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: xOfPatientNumber
+      },
+      series : [
+          {
+              name: '患者数量',
+              type: 'pie',
+              radius : '55%',
+              center: ['50%', '60%'],
+              data:data,
+              itemStyle: {
+                  emphasis: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+              }
+          }
+      ]
+    }
+  }
+
+  getPatientNumberOption = () => {
+    const { patientNumberChartType, xOfPatientNumber, yOfPatientNumber} = this.state;
+    return {
+      title: {
+          text: '新增患者数量统计',
+          x: 'center',
+          textStyle: { //字体颜色
+              color: '#ccc'
+          }
+      },
+      tooltip: {},
+      xAxis: {
+          data: xOfPatientNumber
+      },
+      yAxis: {},
+      series: [
+        {
+          name: '销量',
+          type: patientNumberChartType,
+          data: yOfPatientNumber
+        }
+      ]
+    };
+  }
+  handlePatientNumberSearch = ()=> {
+    let param = {
+      typeCode:1
+    };
+    let values = this.refs.staticIndicators.getFieldsValue();
+    for (const [, value] of Object.entries(values)) {
+      if (value) {
+        param = {
+          time: values.time,
+          typeCode: 1
+        };
+      }
+    }
+    API.statisticCount(param).then((res) => {
       const { data, code, msg } = res;
-      if (code === "200" && data.length > 0) {
+      if (code === "200") {
         this.setState({
-          patientInfo: data[0],
-          existPatient: true,
+          xOfPatientNumber: data.xaxisData,
+          yOfPatientNumber: data.yaxisData,
         });
-      } else if( code ==='200' && data.length ===0 ){
-        Message.error('该患者不存在');
-      }else{
+      } else {
         Message.error(msg);
       }
     });
-  };
-
-  // 获取历史治疗记录
-  queryHistory = (v) => {
-    let param = v;
-    API.getHistoryRecords(param).then((res) => {
-      console.log("getHistoryRecords 历史治疗记录", res);
-      let records = _.get(res, "data");
-      records.sort((a, b) => {
-        return a.treatCount - b.treatCount;
-      });
-      this.setState({
-        historyRecords: records,
-        treatCount: records.length + 1,
-      });
-    });
-  };
-
-  handleQueryInfo = (v) => {
-    this.queryPatient(v);
-    this.queryHistory(v);
-  };
-
-  handleDownload = () => {
-    const { patientInfo } = this.state;
-    window.location.href =
-      "http://10.16.98.192:9090/record/download?id=" + _.get(patientInfo, "id") 
-      + "&description=" + " 经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。";
-    // window.open("http://10.16.98.192:9090/record/download?id=" + _.get(patientInfo, "id") 
-    // + "&description=" + " 经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。") ;
-    // const param = {
-    //   id: _.get(patientInfo, "id"),
-    //   description: "经过脊椎疾病相关治疗方案，经红外热成像技术的客观分析可见，患者脊椎疾病严重程度有了明显的改善。",
-    // }
-    // API.downloadRecord(param).then((res) => {});
   }
 
-  handleAnalysis = () => {
-    this.setState({
-      progressVisible: true,
-    });
-    let timer = setInterval(() => {
-      let percent = this.state.percent + 10;
-      if (percent > 100) {
-        percent = 100;
-        clearImmediate(timer);
+  handleCategoryNumberSearch = ()=> {
+    let param = {
+      typeCode:2
+    };
+    API.statisticCount(param).then((res) => {
+      const { data, code, msg } = res;
+      if (code === "200") {
         this.setState({
-          anaResultVisible: true,
+          xOfCategoryNumber: data.xaxisData,
+          yOfCategoryNumber: data.yaxisData,
         });
+      } else {
+        Message.error(msg);
       }
-      this.setState({ percent });
-    }, 500);
-  };
+    });
+  }
 
-  // 查询表单
+  changePatientNumberChartType = (value) => {
+    this.setState({
+      patientNumberChartType:value
+    })
+  }
+
+  changeCategoryNumberChartType = (value) => {
+    this.setState({
+      categoryNumberChartType: value
+    })
+  }
+
+  componentDidMount() {
+    this.handlePatientNumberSearch();
+    this.handleCategoryNumberSearch();
+  }
+
   renderSearch = () => {
+    const timeOptions = timeList.map((item) => {
+      return <Option key={item.value} value={item.value}>{item.key}</Option>
+    })
+    const chartTypeOptions = chartType.map((item) => {
+      return <Option key={item.value} value={item.value}>{item.key}</Option>
+    })
     return (
       <Form
         layout="inline"
         style={{ marginBottom: 30 }}
-        onFinish={this.handleQueryInfo}
+        ref="staticIndicators"
       >
-        <Form.Item name="patientId" label="患者id：">
-          <Input style={{ width: 100, marginRight: 15 }} placeholder="患者id" />
+        <Form.Item name="time">
+        <Select style={{ width: 160 }} onChange={this.handlePatientNumberSearch} defaultValue='all'>
+          {timeOptions}
+        </Select>
         </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            查询
-          </Button>
+        <Form.Item name="chartType">
+        <Select style={{ width: 160 }} onChange={this.changePatientNumberChartType} defaultValue='line'>
+          {chartTypeOptions}
+        </Select>
         </Form.Item>
       </Form>
     );
   };
+
   render() {
-    let { existPatient, patientInfo } = this.state;
+    const {patientNumberChartType, categoryNumberChartType} = this.state;
+    const chartTypeOptions = chartType.map((item) => {
+      return <Option key={item.value} value={item.value}>{item.key}</Option>
+    })
     return (
       <div className="main-content">
-        {/* {this.renderSearch()} */}
-        
+        <div>
+          <h2 style={{ marginBottom: "30px" }}>
+            新增患者数量统计
+          </h2>
+        </div>
+        {this.renderSearch()}
+        {patientNumberChartType != 'pie' && <ReactEcharts option={this.getPatientNumberOption()}  />}
+        {patientNumberChartType == 'pie' && <ReactEcharts option={this.getPatientNumberPieOption()}  />}
+        <hr/>
+        <div>
+          <h2 style={{ marginBottom: "30px" }}>
+            患病类别数量统计
+          </h2>
+        </div>
+        <Select style={{ width: 160 }} onChange={this.changeCategoryNumberChartType} defaultValue='pie'>
+          {chartTypeOptions}
+        </Select>
+        {categoryNumberChartType != 'pie' && <ReactEcharts option={this.getCategoryNumberOption()}  />}
+        {categoryNumberChartType == 'pie' && <ReactEcharts option={this.getCategoryNumberPieOption()}  />}
+        <hr/>
+        <div>
+          <h2 style={{ marginBottom: "30px" }}>
+            智能分析使用频率统计
+          </h2>
+        </div>
       </div>
     );
   }

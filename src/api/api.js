@@ -76,9 +76,21 @@ const UrlMap = [
     type: "POST",
   },
   {
+    description: "红外热像效果评估", // 用到，成功
+    method: "effectEvaluation",
+    url: "http://localhost:5000/effectEvaluation",
+    type: "POST",
+  },
+  {
     description: "相似电子病历对比", // 用到，成功
     method: "textComparison",
     url: "/patient/textComparison",
+    type: "POST",
+  },
+  {
+    description: "统计分析接口", // 用到，成功
+    method: "statisticCount",
+    url: "/statistic/statisticCount",
     type: "POST",
   },
   {
@@ -152,7 +164,7 @@ UrlMap.forEach((item) => {
         body: data,
       };
     }
-    if (item.url === "http://localhost:5000/similarRecord" || item.url === "http://localhost:5000/recognizeResult") {
+    if (item.url === "http://localhost:5000/similarRecord" || item.url === "http://localhost:5000/recognizeResult" || item.url === "http://localhost:5000/effectEvaluation") {
       url = item.url;
       option = {
         method: "POST",

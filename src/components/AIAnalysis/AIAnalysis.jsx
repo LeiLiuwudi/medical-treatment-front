@@ -61,6 +61,7 @@ class AIAnalysis extends Component {
       progressVisible: false, // 是否显示进度条
       historyRecords: [], // 患者历史治疗记录
       treatCount: 0, // 治疗次数
+      evalutionResult:[],
       analysisFileBefore: {
         img: "",
         txt: {},
@@ -460,21 +461,72 @@ class AIAnalysis extends Component {
     })
   }
 
+  getOption = ()=>{
+    let count = this.state.treatCount
+    var numArr = new Array(count)
+    for(var i=1;i<=count;i++){
+        numArr[i-1] = i;
+    }
+    let xData = numArr.map((item) => {
+      return "第"+item+"次治疗"
+    })
+    let option = {
+        title: {  //标题
+            text: '与正常图像多尺度熵的欧式距离变化趋势',
+            x: 'center',
+            textStyle: { //字体颜色
+                color: '#ccc'
+            }
+        },
+        tooltip:{ //提示框组件
+            trigger: 'axis'
+        },
+        xAxis: { //X轴坐标值
+            data: xData
+        },
+        yAxis: {
+            type: 'value' //数值轴，适用于连续数据
+        },
+        series : [
+            {
+                name:'距离', //坐标点名称
+                type:'line', //线类型
+                data:this.state.evalutionResult //坐标点数据
+            }
+        ]
+    }
+    return option;
+}
+
   handleAnalysis = () => {
     this.setState({
       progressVisible: true,
     });
+    let param = {
+      id: this.state.patientInfo.id
+    }
+    API.effectEvaluation(param)
+      .then((response) => {
+        console.log(111111, response.result)
+        this.setState({
+          treatCount: response.count,
+          evalutionResult: response.result
+        })
+      })
     let timer = setInterval(() => {
       let percent = this.state.percent + 10;
-      if (percent > 100) {
+      if(this.state.evalutionResult.length >1){
         percent = 100;
         clearImmediate(timer);
         this.setState({
           anaResultVisible: true,
         });
+      }else if (percent > 90) {
+        percent = 90;
+        
       }
       this.setState({ percent });
-    }, 500);
+    }, 1000);
   };
 
   // 渲染整体的页面
@@ -706,6 +758,7 @@ class AIAnalysis extends Component {
         {this.state.anaResultVisible && (
               <div className="anal">
                 <h2>智能分析图形结果</h2>
+                <ReactEcharts option={this.getOption()} theme="ThemeStyle" />
                 <p>
                   经过深度学习智能模型分析，该患者病情未见明显好转，效果不显著，建议更换治疗方案。
                 </p>
