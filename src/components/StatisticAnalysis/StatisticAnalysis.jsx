@@ -49,10 +49,13 @@ class StatisticAnalysis extends Component {
     this.state = {
       categoryNumberChartType:'pie',
       patientNumberChartType:'line',
+      analysisNumberChartType:'bar',
       xOfPatientNumber: [],
       yOfPatientNumber: [],
       xOfCategoryNumber: [],
       yOfCategoryNumber: [],
+      xOfAnalysisNumber: [],
+      yOfAnalysisNumber: []
     };
   }
 
@@ -167,6 +170,49 @@ class StatisticAnalysis extends Component {
     }
   }
 
+  getAnalysisNumberPieOption = () => {
+    const {xOfAnalysisNumber, yOfAnalysisNumber} = this.state;
+    const data = []
+    for(var i=0;i<xOfAnalysisNumber.length;i++){
+      let obj = {
+        value: yOfAnalysisNumber[i],
+        name: xOfAnalysisNumber[i]
+      }
+      data.push(obj)
+    }
+    return {
+      title : {
+          text: '新增患者数量统计',
+          x:'center'
+      },
+      tooltip : {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+      },
+      legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: xOfAnalysisNumber
+      },
+      series : [
+          {
+              name: '患者数量',
+              type: 'pie',
+              radius : '55%',
+              center: ['50%', '60%'],
+              data:data,
+              itemStyle: {
+                  emphasis: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+              }
+          }
+      ]
+    }
+  }
+
   getPatientNumberOption = () => {
     const { patientNumberChartType, xOfPatientNumber, yOfPatientNumber} = this.state;
     return {
@@ -191,6 +237,32 @@ class StatisticAnalysis extends Component {
       ]
     };
   }
+
+  getAnalysisNumberOption = () => {
+    const { analysisNumberChartType, xOfAnalysisNumber, yOfAnalysisNumber} = this.state;
+    return {
+      title: {
+          text: '智能分析使用频率统计',
+          x: 'center',
+          textStyle: { //字体颜色
+              color: '#ccc'
+          }
+      },
+      tooltip: {},
+      xAxis: {
+          data: xOfAnalysisNumber
+      },
+      yAxis: {},
+      series: [
+        {
+          name: '数量',
+          type: analysisNumberChartType,
+          data: yOfAnalysisNumber
+        }
+      ]
+    };
+  }
+
   handlePatientNumberSearch = ()=> {
     let param = {
       typeCode:1
@@ -210,6 +282,23 @@ class StatisticAnalysis extends Component {
         this.setState({
           xOfPatientNumber: data.xaxisData,
           yOfPatientNumber: data.yaxisData,
+        });
+      } else {
+        Message.error(msg);
+      }
+    });
+  }
+
+  handleAnalysisNumberSearch = ()=> {
+    let param = {
+      typeCode:3
+    };
+    API.statisticCount(param).then((res) => {
+      const { data, code, msg } = res;
+      if (code === "200") {
+        this.setState({
+          xOfAnalysisNumber: data.xaxisData,
+          yOfAnalysisNumber: data.yaxisData,
         });
       } else {
         Message.error(msg);
@@ -240,6 +329,12 @@ class StatisticAnalysis extends Component {
     })
   }
 
+  changeAnalysisNumberChartType = (value) => {
+    this.setState({
+      analysisNumberChartType:value
+    })
+  }
+
   changeCategoryNumberChartType = (value) => {
     this.setState({
       categoryNumberChartType: value
@@ -249,6 +344,7 @@ class StatisticAnalysis extends Component {
   componentDidMount() {
     this.handlePatientNumberSearch();
     this.handleCategoryNumberSearch();
+    this.handleAnalysisNumberSearch();
   }
 
   renderSearch = () => {
@@ -279,7 +375,7 @@ class StatisticAnalysis extends Component {
   };
 
   render() {
-    const {patientNumberChartType, categoryNumberChartType} = this.state;
+    const {patientNumberChartType, categoryNumberChartType, analysisNumberChartType} = this.state;
     const chartTypeOptions = chartType.map((item) => {
       return <Option key={item.value} value={item.value}>{item.key}</Option>
     })
@@ -310,6 +406,11 @@ class StatisticAnalysis extends Component {
             智能分析使用频率统计
           </h2>
         </div>
+        <Select style={{ width: 160 }} onChange={this.changeAnalysisNumberChartType} defaultValue='line'>
+          {chartTypeOptions}
+        </Select>
+        {analysisNumberChartType != 'pie' && <ReactEcharts option={this.getAnalysisNumberOption()}  />}
+        {analysisNumberChartType == 'pie' && <ReactEcharts option={this.getAnalysisNumberPieOption()}  />}
       </div>
     );
   }
