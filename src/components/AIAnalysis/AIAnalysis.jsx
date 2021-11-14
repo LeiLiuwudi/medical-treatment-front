@@ -58,6 +58,33 @@ class AIAnalysis extends Component {
       gender:"",
       profession:"",
       addInfrareImage: false,
+      evalutionList:[
+        {
+          count:1,
+          percent:'-',
+          temperature: 37.5
+        },
+        {
+          count:2,
+          percent:'-21.4%',
+          temperature: 37.1
+        },
+        {
+          count:3,
+          percent:'27.3%',
+          temperature: 37.5
+        },
+        {
+          count:4,
+          percent:'0%',
+          temperature: 37.5
+        },
+        {
+          count:5,
+          percent:'21.4%',
+          temperature: 37.9
+        },
+      ],
       imgResult:"",
       curFileBase64:"",
       anaResultVisible: false,
@@ -638,6 +665,26 @@ class AIAnalysis extends Component {
           },
         },
     ]
+    const evalutionColumns = [
+      {
+        title: "治疗次数",
+        dataIndex: "count",
+        width: "6%",
+        align: "center",
+      },
+      {
+        title: "与正常图像相比环比变化",
+        dataIndex: "percent",
+        width: "6%",
+        align: "center",
+      },
+      {
+        title: "红外图像局部最高温度",
+        dataIndex: "temperature",
+        width: "6%",
+        align: "center",
+      },
+    ]
     return (
       <div
         className="main-content"
@@ -796,7 +843,19 @@ class AIAnalysis extends Component {
         {this.state.anaResultVisible && (
               <div className="anal">
                 <h2>智能分析图形结果</h2>
-                <ReactEcharts option={this.getOption()} theme="ThemeStyle" />
+                <div className='parent'>
+                  <div className='chart'>
+                    <ReactEcharts option={this.getOption()} theme="ThemeStyle" />
+                  </div>
+                  <div className='table'>
+                    <Table
+                      bordered="true"
+                      columns={evalutionColumns}
+                      dataSource={this.state.evalutionList}
+                    />
+                  </div>
+                </div>
+                
                 <p>
                   经过深度学习智能模型分析，该患者病情未见明显好转，效果不显著，建议更换治疗方案。
                 </p>
