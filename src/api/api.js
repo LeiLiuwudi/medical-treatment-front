@@ -76,6 +76,12 @@ const UrlMap = [
     type: "POST",
   },
   {
+    description: "颈椎区域识别", // 用到，成功
+    method: "cutResult",
+    url: "http://localhost:5000/cutResult",
+    type: "POST",
+  },
+  {
     description: "红外热像效果评估", // 用到，成功
     method: "effectEvaluation",
     url: "http://localhost:5000/effectEvaluation",
@@ -165,6 +171,15 @@ UrlMap.forEach((item) => {
       };
     }
     if (item.url === "http://localhost:5000/similarRecord" || item.url === "http://localhost:5000/recognizeResult" || item.url === "http://localhost:5000/effectEvaluation") {
+      url = item.url;
+      option = {
+        method: "POST",
+        // mode: "no-cors",
+        body: JSON.stringify(data),
+      };
+      return fetch(url, option).then((res) => res.json())
+    }
+    if(item.url === "http://localhost:5000/cutResult"){
       url = item.url;
       option = {
         method: "POST",

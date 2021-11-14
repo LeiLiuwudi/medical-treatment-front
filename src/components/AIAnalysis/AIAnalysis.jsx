@@ -14,7 +14,8 @@ import {
   Message,
   Tabs,
   Table,
-  Progress
+  Progress,
+  Image
 } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import "./AI-analysis.less";
@@ -52,9 +53,12 @@ class AIAnalysis extends Component {
       repeatSwitch: false,
       recognizeList:[],
       birthday:"",
+      detectId: -1,
+      detectNeck: false,
       gender:"",
       profession:"",
       addInfrareImage: false,
+      imgResult:"",
       curFileBase64:"",
       anaResultVisible: false,
       percent: 0, // 进度条进度
@@ -336,6 +340,12 @@ class AIAnalysis extends Component {
     });
   }
 
+  detectCancle = () => {
+    this.setState({
+      detectNeck: false
+    })
+  }
+
   // 是否显示近红外记录
   showHistoryNIRS = () => {
     this.setState({
@@ -412,10 +422,10 @@ class AIAnalysis extends Component {
     };
     return <ReactEcharts option={option} />;
   };
-  
-  detect = (id) =>{
+
+  recognizeClassification = () => {
     let param = {
-      id: id,
+      id: this.state.detectId,
     };
     API.recognizeResult(param)
       .then((response) => {
@@ -423,6 +433,26 @@ class AIAnalysis extends Component {
           patientId: this.state.patientInfo.id,
         }
         this.getRecognizeList(param1);
+        this.setState({
+          detectNeck: false
+        })
+      })
+  }
+  
+  detect = (id) =>{
+    let param = {
+      id: id,
+    };
+    this.setState({
+      detectId: id,
+    })
+    API.cutResult(param)
+      .then((response) => {
+        console.log(response.result)
+        this.setState({
+          imgResult: response.result,
+          detectNeck: true
+        })
       })
       .catch((error) => {
         Message.error("未检测到颈部区域");
@@ -432,6 +462,12 @@ class AIAnalysis extends Component {
 
   beforeUpload = (f) =>{
     return false;
+  }
+
+  show = () => {
+    this.setState({
+      addInfrareImage: true
+    })
   }
   
   onFinish = async(values) =>{
@@ -531,7 +567,9 @@ class AIAnalysis extends Component {
 
   // 渲染整体的页面
   render() {
-    const { exactSearch, patientInfo} = this.state;
+    const { exactSearch, patientInfo, imgResult} = this.state;
+    const base64 = 'data:image/jpeg;base64,' + imgResult;
+    const innerHtml = "<img src='"+ base64 + "' width=200 height=100/>"
     const columns = [
         {
           title: "id",
@@ -775,6 +813,17 @@ class AIAnalysis extends Component {
                 </Button>
               </div>
             )}
+        <Modal
+          title={"检测到的颈部区域"}
+          visible={this.state.detectNeck}
+          onCancel={this.detectCancle}
+          footer={null}
+        >
+          <div dangerouslySetInnerHTML={{__html:innerHtml}} style={{textAlign:'center'}}/>
+          <br/>
+          <br/>
+          <div style={{textAlign:'center'}}><Button type="primary" onClick={this.recognizeClassification}>点击继续进行病种分类检测</Button></div>
+        </Modal>
       </div>
     );
   }
