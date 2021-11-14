@@ -71,7 +71,7 @@ class StatisticAnalysis extends Component {
     }
     return {
       title : {
-          text: '某站点用户访问来源',
+          text: '患病类别数量统计',
           x:'center'
       },
       tooltip : {
