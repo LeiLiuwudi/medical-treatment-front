@@ -4,7 +4,7 @@ import RenderInfMode from "./RenderInfMode";
 import RenderCTMode from "./RenderCTMode";
 import RenderMRIMode from "./RenderMRIMode";
 import RenderHistoryTable from "../StatisticAnalysis/RenderHistoryTable";
-import _ from "lodash";
+import _, { result } from "lodash";
 import {
   Input,
   Form,
@@ -26,6 +26,17 @@ import { getAge } from "../../utils/dateUtils";
 const { TabPane } = Tabs;
 const { Search } = Input;
 const { Option } = Select;
+const textResult = [
+  "经过深度学习智能模型分析，该患者病情明显好转，效果显著，建议维持现有治疗方案。",
+  "经过深度学习智能模型分析，该患者病情已加重，建议终止现有治疗方案。",
+  "经过深度学习智能模型分析，该患者病情未见明显好转，效果不显著，建议更换治疗方案。"
+]
+
+const textAnalysis = [
+  "结合患者主诉和临床表现，患者病情恢复良好，后期坚持康复训练，效果更佳",
+  "结合患者主诉和临床表现，考虑颈椎退行性病变可能性，建议住院观察，以期进一步的判断",
+  "结合患者主诉和临床表现，患者病情未得到明显控制，建议讨论决定新的治疗方案"
+]
 
 function getBase64(file) {
   return new Promise((resolve, reject) => {
@@ -52,6 +63,7 @@ class AIAnalysis extends Component {
       exactSearch: false,
       repeatSwitch: false,
       recognizeList:[],
+      trend:0,
       birthday:"",
       detectId: -1,
       detectNeck: false,
@@ -573,7 +585,8 @@ class AIAnalysis extends Component {
         console.log(111111, response.result)
         this.setState({
           treatCount: response.count,
-          evalutionResult: response.result
+          evalutionResult: response.result,
+          trend: response.trend
         })
       })
     let timer = setInterval(() => {
@@ -594,7 +607,7 @@ class AIAnalysis extends Component {
 
   // 渲染整体的页面
   render() {
-    const { exactSearch, patientInfo, imgResult} = this.state;
+    const { exactSearch, patientInfo, imgResult, trend} = this.state;
     const base64 = 'data:image/jpeg;base64,' + imgResult;
     const innerHtml = "<img src='"+ base64 + "' width=200 height=100/>"
     const columns = [
@@ -857,11 +870,11 @@ class AIAnalysis extends Component {
                 </div>
                 
                 <p>
-                  经过深度学习智能模型分析，该患者病情未见明显好转，效果不显著，建议更换治疗方案。
+                  {textResult[trend]}
                 </p>
                 <h2>智能分析文本报告</h2>
                 <p>
-                  结合患者主诉和临床表现，考虑颈椎强行性病变可能性，建议住院观察，以期进一步的判断
+                  {textAnalysis[trend]}
                 </p>
                 <Button 
                   type="primary" 
