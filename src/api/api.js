@@ -128,6 +128,12 @@ const UrlMap = [
     method:"addRole",
     url:"/authority/role",
     type:"POST"
+  },
+  {
+    description:"下载分析报告",
+    method:"downloadRecord",
+    url:"/recognize/download",
+    type:"GET"
   }
 ];
 const API = {};

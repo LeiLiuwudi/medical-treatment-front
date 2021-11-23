@@ -115,6 +115,7 @@ class AIAnalysis extends Component {
       }, // 分析需要上传的内容
       anaResultBefore: { imgUrl: "", classification: "", loading: false }, // 治疗前的智能分析结果
       anaResultAfter: { imgUrl: "", classification: "", loading: false }, //治疗后的智能分析结果
+      record_id: 0,     //智能分析id
     };
   }
 
@@ -586,7 +587,8 @@ class AIAnalysis extends Component {
         this.setState({
           treatCount: response.count,
           evalutionResult: response.result,
-          trend: response.trend
+          trend: response.trend,
+          record_id : response.record_id,
         })
       })
     let timer = setInterval(() => {
@@ -603,6 +605,29 @@ class AIAnalysis extends Component {
       }
       this.setState({ percent });
     }, 1000);
+  };
+
+  handleDownload = () => {
+    let param = {
+      "id" : this.state.record_id
+    }
+    API.downloadRecord(param).then(res => {
+      res.blob().then(blob => {
+        let blobUrl = window.URL.createObjectURL(blob);
+        console.log(blobUrl);
+        const filename = 'user.pdf';
+        const aElement = document.createElement('a');
+        document.body.appendChild(aElement);
+        aElement.style.display = 'none';
+        aElement.href = blobUrl;
+        aElement.download = filename;
+        aElement.click();
+        document.body.removeChild(aElement);
+      });
+    }).catch((error) => {
+      //关闭loading 按钮恢复正常
+      console.log('文件下载失败', error);
+    });
   };
 
   // 渲染整体的页面
