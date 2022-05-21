@@ -28,7 +28,7 @@ class AccessControl extends Component {
         {label:"新建患者个人信息", value:"patientCreateAuthority"},
         {label:"病历查询", value:"recordQueryAuthority"},
         {label:"病历比较", value:"recordComparisonAuthority"},
-        {label:"鉴定", value:"identifyAuthorityAuthority"},
+        {label:"颈椎病分类识别", value:"identifyAuthorityAuthority"},
         {label:"效果评估", value:"effectEvaluationAuthority"},
         {label:"统计分析", value:"statAnalysisAuthority"},
         {label:"权限控制", value:"authorityManagement"},
@@ -313,7 +313,7 @@ class AccessControl extends Component {
                         })}
                     </Select>
                 </Form.Item>
-
+                <br /><br /><br /><br /><br /><br />
                 <Checkbox.Group
                     style={{width:"100%"}}
                     onChange={this.onChangeCheckbox}

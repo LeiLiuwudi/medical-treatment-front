@@ -27,7 +27,7 @@ const { TabPane } = Tabs;
 const { Search } = Input;
 const { Option } = Select;
 const textResult = [
-  "经过深度学习智能模型分析，该患者病情明显好转，效果显著，建议维持现有治疗方案。",
+  "经过疗效评估模型分析，该患者病情明显好转，效果显著，建议维持现有治疗方案。",
   "经过深度学习智能模型分析，该患者病情已加重，建议终止现有治疗方案。",
   "经过深度学习智能模型分析，该患者病情未见明显好转，效果不显著，建议更换治疗方案。"
 ]
@@ -78,23 +78,13 @@ class AIAnalysis extends Component {
         },
         {
           count:2,
-          percent:'-21.4%',
+          percent:'-7.2%',
           temperature: 37.1
         },
         {
           count:3,
-          percent:'27.3%',
-          temperature: 37.5
-        },
-        {
-          count:4,
-          percent:'0%',
-          temperature: 37.5
-        },
-        {
-          count:5,
-          percent:'21.4%',
-          temperature: 37.9
+          percent:'-40.5%',
+          temperature: 36.5
         },
       ],
       imgResult:"",
@@ -558,10 +548,12 @@ class AIAnalysis extends Component {
             trigger: 'axis'
         },
         xAxis: { //X轴坐标值
-            data: xData
+            data: xData,
+            name: "治疗次数"
         },
         yAxis: {
-            type: 'value' //数值轴，适用于连续数据
+            type: 'value', //数值轴，适用于连续数据
+            name: "欧氏距离"
         },
         series : [
             {

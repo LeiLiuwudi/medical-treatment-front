@@ -111,7 +111,7 @@ class LeftNav extends Component {
           className="left-nav-header"
           onClick={() => this.handleChangeColor("/admin/home")}
         >
-          <h2>颈椎病智慧医疗</h2>
+          <h2>颈椎病辅助康复</h2>
         </Link>
         <Menu mode="inline" theme="dark" selectable={false}>
           {this.getMenuNodes_map(menuList)}

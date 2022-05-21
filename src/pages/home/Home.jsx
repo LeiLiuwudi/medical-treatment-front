@@ -77,7 +77,7 @@ class Home extends Component {
           }}
         >
           <div style={{ display: "flex" }}>
-            <h1 style={{ color: "#ffffff" }}>颈椎病智慧医疗系统</h1>
+            <h1 style={{ color: "#ffffff" }}>颈椎病智慧辅助康复子系统</h1>
             <div
               style={{
                 width: 500,

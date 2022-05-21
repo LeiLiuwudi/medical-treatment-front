@@ -459,7 +459,7 @@ class PatientQuery extends Component {
       total: this.state.listData.length, //数据总数
       defaultCurrent: 1, //默认当前页
       current: this.state.currentTablePage, //当前页
-      pageSize: 8, //每页条数
+      pageSize: 5, //每页条数
       onChange: (page, pageSize) => {
         console.log("page", page, pageSize);
         //页码改变的回调，参数是改变后的页码及每页条数
@@ -551,12 +551,17 @@ class PatientQuery extends Component {
               </Col>
             </Row>
             <Row>
-              <Col span={12}>
+              <Col span={24}>
                 <strong>诊断依据：</strong>
                 <div className="setformat">{this.state.patientInfo.diagnoseBasis}</div>
               </Col>
             </Row>
             <Row>
+              <Col span={8}>
+                <Button type="primary" onClick={() => this.showHelp()}>
+                  添加用药与治疗方案
+                </Button>
+              </Col>
               <Col>
                 <Button type="primary" onClick={() => this.showHelp()}>
                   相似电子病历对比分析
@@ -651,8 +656,16 @@ class PatientQuery extends Component {
             </Row>
             <Row>
               <Col>
-                <strong>诊断依据：</strong>
-                <div className="setformat">{this.state.patientInfo1.diagnoseBasis}</div>
+                <strong>历史用药：</strong>
+                <div className="setformat">暂无</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>治疗方案：</strong>
+                <div className="setformat">
+                暂无
+                </div>
               </Col>
             </Row>
           </div>
@@ -727,8 +740,18 @@ class PatientQuery extends Component {
             </Row>
             <Row>
               <Col>
-                <strong>诊断依据：</strong>
-                <div className="setformat">{this.state.similarPatientInfo.diagnoseBasis}</div>
+                <strong>历史用药：</strong>
+                <div className="setformat">
+                  1.阿司匹林、氯唑沙宗片、安坦片、苯妥英钠
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <strong>治疗方案：</strong>
+                <div className="setformat">
+                在服用药物基础上，到康复科做颈部针灸推拿等治疗
+                </div>
               </Col>
             </Row>
           </div>

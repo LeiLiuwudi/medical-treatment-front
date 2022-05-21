@@ -1,5 +1,6 @@
 import React , { useState, useEffect } from "react";
-import { Upload,Form, Input, Select, Button, DatePicker, Modal } from "antd";
+import { Upload,Form, Input, Select, Button, DatePicker, Modal} from "antd";
+import { UploadOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
 import moment from "moment";
 import API from "../../api/api";
@@ -75,7 +76,7 @@ function NewPatient(props) {
     "颈椎疲劳",
     "颈椎劳损",
     "颈椎间盘突出",
-    "颈椎强行性病变"
+    "颈椎退行性病变"
   ]
 
   const doctorOptions = doctorList.map((item) => {
@@ -105,7 +106,11 @@ function NewPatient(props) {
         >
           <Input />
         </Form.Item>
-
+        {/* <Input type="file" style={{ width: 200,display:"flex",marginLeft:1600,marginTop:-55 }} placeholder="病历文件解析上传"/> */}
+        {/* <div style={{ width: 200,display:"flex",marginLeft:1600,marginTop:-45 }}>
+        <Upload>
+          <Button icon={<UploadOutlined />} type="primary">病历文件解析上传</Button>
+        </Upload></div> */}
         <Form.Item
           name="doctor"
           label="主治医生"
